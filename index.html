@@ -726,12 +726,13 @@
       // Commission Status Widget
       function updateLocalTime() {
         const timeElement = document.getElementById('localTime');
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('en-US', {
+        // Display Pakistan Standard Time (PKT - GMT +5)
+        const timeString = new Date().toLocaleTimeString('en-US', {
           hour12: true,
           hour: '2-digit',
           minute: '2-digit',
-          second: '2-digit'
+          second: '2-digit',
+          timeZone: 'Asia/Karachi' // Pakistan Standard Time
         });
         if (timeElement) {
           timeElement.textContent = timeString;
