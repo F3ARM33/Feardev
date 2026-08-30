@@ -68,8 +68,8 @@ const DISCORD_USER_ID = "1088022144308486176";
 //   boostTier: false, or 1-9 — how long you've boosted:
 //              1=1mo  2=2mo  3=3mo  4=6mo  5=9mo  6=12mo  7=15mo  8=18mo  9=24mo
 const MY_BADGES = {
-  nitroTier: "diamond",
-  boostTier: 1,
+  nitroTier: "platinum",
+  boostTier: 3,
 };
 
 /* ============================== ICONS (inline SVG strings) ============================== */
