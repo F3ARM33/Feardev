@@ -127,6 +127,7 @@
 
 <!-- INDEX: horizontal pan -->
 <section class="pan" id="index" aria-label="More builds">
+  <span class="pan-word" id="panWord" aria-hidden="true">THE SHELF THE SHELF THE SHELF</span>
   <div class="pan-track" id="indexMount">
     <div class="pan-intro">
       <h2>The rest of <em>the shelf</em>.</h2>
@@ -136,14 +137,27 @@
   </div>
 </section>
 
-<!-- CRAFT: the header holds while the answers scroll past it -->
+<!-- CRAFT: the panel holds while the steps pass -->
 <section class="sec" id="craft">
-  <div class="wrap craft-grid">
-    <div class="craft-stick rv">
-      <div class="sec-head" style="margin-bottom:26px"><h2>How I <em>build</em>.</h2></div>
-      <div class="craft-fig">60<small>Frames per second, held<br />on a mid range phone</small></div>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <h2>How I <em>build</em>.</h2>
+      <p>Five steps, the same five every time, so you always know what is happening to your map and when.</p>
+      <div class="rule"></div>
     </div>
-    <div class="craft-list" id="craftMount"></div>
+    <div class="craft-grid">
+      <div class="craft-stick">
+        <div class="craft-media" id="craftMedia"></div>
+        <div class="craft-figs">
+          <div><b>60</b><small>FPS held on a mid range phone</small></div>
+          <div><b>5</b><small>Steps from brief to handover</small></div>
+        </div>
+      </div>
+      <div class="craft-list">
+        <span class="craft-progress" aria-hidden="true"><i></i></span>
+        <div id="craftMount"></div>
+      </div>
+    </div>
   </div>
 </section>
 </main>
@@ -163,20 +177,29 @@
   </div>
 </section>
 
-<!-- START -->
+<!-- START: one console panel rather than a headline and a form-shaped gap -->
 <section class="sec" id="start">
   <div class="wrap">
     <div class="start-head rv">
-      <h2>Have a map <em>in mind</em>?</h2>
+      <h2><span class="ln"><span>Have a map</span></span><span class="ln"><span><em>in mind</em>?</span></span></h2>
       <div class="rule" style="margin-top:30px"></div>
     </div>
-    <div class="start-grid">
-      <div class="rv">
-        <p class="start-lede">Tell me the game, the scope, and roughly what you are working with. I will come back with a plan, a timeline, and a quote.</p>
+
+    <div class="console rv">
+      <div class="console-main">
+        <p class="start-lede">Tell me the game, the scope, and roughly what you are working with. You get a plan, a timeline, and a fixed quote before anything is built.</p>
         <div class="scope" id="scopeMount"></div>
-        <p class="avail"><span class="dot"></span> Available for commissions</p>
       </div>
-      <div class="rv" id="discordMount"></div>
+
+      <aside class="console-side">
+        <div class="clock">
+          <span class="mono">My local time</span>
+          <b id="clockTime">00:00</b>
+          <span class="clock-z" id="clockZone">GMT +5</span>
+        </div>
+        <p class="avail"><span class="dot"></span> Available for commissions</p>
+        <div id="discordMount"></div>
+      </aside>
     </div>
   </div>
 </section>

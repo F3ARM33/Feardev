@@ -156,34 +156,40 @@ const PROJECTS = [
   amb: AMBIENT[p.folder] || ["#2f3566", "#3a2350"],
 }));
 
+/* Each step pairs with a build that shows it. The sticky panel on the left
+   swaps to the matching shot as you move down the list. */
 const CRAFT = [
   {
-    kind: "figure", n: "60", suffix: " FPS",
-    title: "Optimized as it is built",
-    body: "Part counts, unions, and texture budgets get watched from the first block. Detail that costs frames is detail that gets cut.",
+    step: "Scope",
+    title: "The brief gets pinned down first",
+    body: "Game, style, size, and deadline agreed in writing before a single part is placed. You get a plan, a timeline, and a fixed quote.",
+    img: "img/enchanted/3.webp",
   },
   {
-    kind: "image", img: "img/igris/1.webp",
+    step: "Style",
     title: "Any art style you need",
-    body: "Anime, low-poly, cartoony, gritty high-poly realism. The style follows your game, not my habits.",
+    body: "Anime, low poly, cartoony, gritty high poly realism. The style follows your game, not my habits.",
+    img: "img/igris/1.webp",
   },
   {
-    kind: "plain",
+    step: "Build",
     title: "Terrain and interiors, not just props",
-    body: "Sculpted landscapes, multi-room interiors, and full maps. Whole environments rather than a folder of models.",
+    body: "Sculpted landscapes, multi room interiors, and full maps. Whole environments rather than a folder of models.",
+    img: "img/castle/1.webp",
   },
   {
-    kind: "plain",
-    title: "Revisions until it is right",
-    body: "Work in progress goes to you throughout, not just at the end. Changes are expected, not charged as surprises.",
+    step: "Review",
+    title: "Revisions happen during the build",
+    body: "Work in progress reaches you at every stage, so changes get made while they are cheap. Revisions inside the agreed scope are part of the price. Once it is delivered and signed off, new work is a new quote.",
+    img: "img/wizard-tower/4.webp",
   },
   {
-    kind: "accent",
+    step: "Deliver",
     title: "Delivered on the date agreed",
-    body: "Timelines are set before the first block is placed, and I hold to them. Eight of eight reviewers mention delivery.",
+    body: "Timelines are set before the first block is placed, and I hold to them. Optimisation is not a final pass either. Part counts, unions, and texture budgets get watched from the first block.",
+    img: "img/astral-lounge/1.webp",
   },
 ];
-
 const REVIEWS = [
   { name: "Halo", role: "Game developer", quote: "The map was good.", rating: 5, avatar: "img/halo.webp" },
   { name: "Havik", role: "Studio owner", quote: "f34r is a cool dude and I have worked with him a lot.", rating: 5, avatar: "img/havik.webp" },
@@ -369,7 +375,20 @@ function renderTicker() {
   const mount = document.getElementById("tickerMount");
   if (!mount) return;
   const run = TICKER.map((t) => `<span>${esc(t)}</span><b></b>`).join("");
-  mount.innerHTML = run + run; // duplicated once so the -50% keyframe loops seamlessly
+
+  // One half of the track has to be wider than the viewport, or the -50% loop
+  // point lands on screen and the row visibly restarts with a gap beside it.
+  // Measure one run, then repeat it enough times to cover the widest viewport
+  // the page is likely to meet, and duplicate the whole thing for the loop.
+  mount.innerHTML = run;
+  const one = mount.scrollWidth || 600;
+  const need = Math.max(2, Math.ceil((window.innerWidth * 1.35) / one));
+  const half = run.repeat(need);
+  mount.innerHTML = half + half;
+
+  // Keep the run time proportional to the length, so the speed does not change
+  // with how many copies it took to fill the screen.
+  mount.style.animationDuration = `${(mount.scrollWidth / 2 / 78).toFixed(1)}s`;
 }
 
 /* ============================== WORK: THE REEL ==============================
@@ -460,31 +479,78 @@ function renderIndex() {
 }
 
 /* ============================== CRAFT ==============================
-   The heading and the headline number hold in place on the left while the
-   answers scroll past on the right. The 60 FPS figure moved into the sticky
-   column, so this list is four real answers with no filler tile. */
+   A list of statements is not a process. This is: the five steps run down the
+   right, and the panel on the left holds while they pass, swapping to the build
+   that shows the step you are reading, with a rule that fills as you move
+   through. The sticky panel is what makes the section worth scrolling rather
+   than skimming. */
 
 function renderCraft() {
   const mount = document.getElementById("craftMount");
-  CRAFT.filter((c) => c.kind !== "figure").forEach((c) => {
+  const media = document.getElementById("craftMedia");
+  if (!mount) return;
+
+  if (media) {
+    media.innerHTML = CRAFT.map(
+      (c, i) =>
+        `<img src="${c.img}" alt="" loading="${i === 0 ? "eager" : "lazy"}" width="1200" height="900" class="${i === 0 ? "on" : ""}" data-shot="${i}" />`
+    ).join("");
+  }
+
+  CRAFT.forEach((c, i) => {
     mount.appendChild(
       el(`
-      <div class="craft-item rv">
-        <h3>${esc(c.title)}</h3>
-        <p>${esc(c.body)}</p>
-        ${c.img ? `<div class="craft-shot"><img src="${c.img}" alt="" loading="lazy" width="960" height="540" /></div>` : ""}
+      <div class="step rv" data-step="${i}">
+        <span class="step-n">${String(i + 1).padStart(2, "0")}</span>
+        <div class="step-body">
+          <span class="mono step-k">${esc(c.step)}</span>
+          <h3>${esc(c.title)}</h3>
+          <p>${esc(c.body)}</p>
+        </div>
       </div>
     `)
     );
   });
 }
 
+/* Which step is being read drives the panel. IntersectionObserver only, so it
+   costs nothing per frame and degrades to the first shot if it is unavailable. */
+function setupCraft() {
+  const steps = [...document.querySelectorAll(".step")];
+  const shots = [...document.querySelectorAll("#craftMedia img")];
+  const bar = document.querySelector(".craft-progress i");
+  if (!steps.length || !("IntersectionObserver" in window)) return;
+
+  let active = -1;
+  const show = (n) => {
+    if (n === active) return;
+    active = n;
+    shots.forEach((s, i) => s.classList.toggle("on", i === n));
+    steps.forEach((s, i) => s.classList.toggle("on", i === n));
+    if (bar) bar.style.height = `${((n + 1) / steps.length) * 100}%`;
+  };
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      const hit = entries
+        .filter((e) => e.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (hit) show(Number(hit.target.dataset.step));
+    },
+    { rootMargin: "-38% 0px -38% 0px", threshold: [0, 0.5, 1] }
+  );
+  steps.forEach((s) => io.observe(s));
+  show(0);
+}
+
 /* ============================== REVIEWS: THE QUOTE WALL ==============================
-   Eight short quotes laid out in equal columns read as eight equal cards, which
-   flattens them. Here one lead quote is set in display type and carries the
-   section, the average sits beside it as a piece of type rather than a badge,
-   and the rest fall into a measured grid beneath. The average is computed from
-   the data, so it can never drift from the reviews actually on the page. */
+   The quotes are short and wildly uneven in length. In a fixed grid every row
+   takes the height of its tallest card, which is what left all that air between
+   them. The seven supporting quotes now flow in a packed column layout, so each
+   card is only as tall as its own text and the wall closes up. One lead quote in
+   display type carries the section, with the average beside it as a piece of
+   type rather than a badge. The average is computed from the review data, so it
+   cannot drift from what is on the page. */
 
 function renderReviews() {
   const mount = document.getElementById("voicesMount");
@@ -512,20 +578,17 @@ function renderReviews() {
   const rest = [...REVIEWS];
   const leadIx = rest.reduce((best, r, i) => (r.quote.length > rest[best].quote.length ? i : best), 0);
   const lead = rest.splice(leadIx, 1)[0];
-  const wide = rest.pop();
 
-  const score = `
-    <div class="wall-score w-4">
-      <div class="stars" aria-hidden="true">${[1,2,3,4,5].map(() => I_STAR(true)).join("")}</div>
-      <b>${avg.toFixed(1)}</b>
-      <small>Average rating<br />${fives} of ${REVIEWS.length} at five stars</small>
-    </div>`;
-
-  mount.innerHTML =
-    score +
-    `<div class="w-8">${quote(lead, "lead")}</div>` +
-    rest.map((r) => `<div class="w-4">${quote(r, "")}</div>`).join("") +
-    `<div class="w-12">${quote(wide, "wide")}</div>`;
+  mount.innerHTML = `
+    <div class="wall-top">
+      <div class="wall-score">
+        <div class="stars" aria-hidden="true">${[1, 2, 3, 4, 5].map(() => I_STAR(true)).join("")}</div>
+        <b>${avg.toFixed(1)}</b>
+        <small>Average rating<br />${fives} of ${REVIEWS.length} at five stars</small>
+      </div>
+      ${quote(lead, "lead")}
+    </div>
+    <div class="wall-rest">${rest.map((r) => quote(r, "")).join("")}</div>`;
 }
 
 /* ============================== TOOLS ============================== */
@@ -542,8 +605,55 @@ function renderTools() {
 function renderScope() {
   const mount = document.getElementById("scopeMount");
   mount.innerHTML = SCOPE.map(
-    (s) => `<div class="scope-row"><strong>${esc(s.label)}</strong><span>${esc(s.detail)}</span></div>`
+    (s, i) =>
+      `<div class="scope-row">
+        <span class="scope-n">${String(i + 1).padStart(2, "0")}</span>
+        <span><strong>${esc(s.label)}</strong><span>${esc(s.detail)}</span></span>
+      </div>`
   ).join("");
+}
+
+/* ============================== LOCAL CLOCK ==============================
+   Where I am in the day, so a client can tell whether a reply is likely in the
+   next hour. Asia/Karachi is GMT+5 and does not observe daylight saving, so the
+   label is fixed; the time itself comes from the browser rather than from an
+   offset I hard coded. */
+
+function setupClock() {
+  const out = document.getElementById("clockTime");
+  const zone = document.getElementById("clockZone");
+  if (!out) return;
+
+  let fmt;
+  try {
+    fmt = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Karachi",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  } catch (e) {
+    // No IANA database available: fall back to a fixed +5 offset.
+    fmt = null;
+  }
+
+  const paint = () => {
+    let hh, mm;
+    if (fmt) {
+      [hh, mm] = fmt.format(new Date()).split(":");
+    } else {
+      const d = new Date(Date.now() + (5 * 60 + new Date().getTimezoneOffset()) * 60000);
+      hh = String(d.getHours()).padStart(2, "0");
+      mm = String(d.getMinutes()).padStart(2, "0");
+    }
+    out.innerHTML = `${hh}<span>:</span>${mm}`;
+  };
+
+  paint();
+  // Tick on the minute rather than every second: nothing here needs seconds,
+  // and an interval that fires 60 times more often buys nothing.
+  setInterval(paint, 20000);
+  if (zone) zone.textContent = "Pakistan, GMT +5";
 }
 
 /* ============================== DISCORD CARD MARKUP ==============================
@@ -1188,10 +1298,10 @@ function setupMotion() {
   /* -- THE REEL.
         Arriving, a build opens: the slab is clipped to a narrow vertical slot
         in the middle of the screen and widens to full frame as it takes over,
-        while its image settles from an over scale. Leaving, it does not simply
-        shrink. It tips away from you and drops back into the stack, so the six
-        panels read as one deck being dealt rather than six pages sliding. All
-        of it is transform, opacity and an inset clip, so it stays on the
+        while its image settles from an over scale. Leaving, it eases back and
+        lifts rather than hinging away, so the handoff stays smooth and the six
+        panels read as one continuous handoff rather than six pages sliding.
+        All of it is transform, opacity and an inset clip, so it stays on the
         compositor. -- */
   const panels = gsap.utils.toArray(".panel");
   panels.forEach((panel, i) => {
@@ -1240,13 +1350,10 @@ function setupMotion() {
     // leaving: tip away and drop back into the deck
     if (i < panels.length - 1) {
       gsap.to(panel, {
-        scale: 0.86,
-        rotationX: 10,
-        yPercent: -4,
-        opacity: 0.18,
-        transformPerspective: 1600,
-        transformOrigin: "50% 100%",
-        ease: "power1.in",
+        scale: 0.92,
+        yPercent: -2.5,
+        opacity: 0.2,
+        ease: "none",
         scrollTrigger: { trigger: panels[i + 1], start: "top bottom", end: "top top", scrub: true },
       });
     }
@@ -1286,6 +1393,23 @@ function setupMotion() {
         invalidateOnRefresh: true,
       },
     });
+    // the word behind the row pans at a slower rate, which is what makes the
+    // shelf read as a space the cards are moving through
+    const word = document.getElementById("panWord");
+    if (word) {
+      gsap.to(word, {
+        x: () => -distance() * 0.42,
+        ease: "none",
+        scrollTrigger: {
+          trigger: pan,
+          start: "top top",
+          end: () => `+=${distance()}`,
+          scrub: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+    }
+
     // each card's image drifts against the track, so the row has depth rather
     // than sliding as one flat plane
     gsap.utils.toArray(".card-media img").forEach((img) => {
@@ -1343,6 +1467,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupReveal();
   setupCountUp();
   setupAmbient();
+  setupCraft();
+  setupClock();
   setupKeys();
   setupDiscordCard();
   setupMotion();

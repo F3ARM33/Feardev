@@ -180,12 +180,34 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
 
 /* ============================== NAV ============================== */
 .nav{
-  position:fixed; top:0; left:0; right:0; z-index:50; height:72px;
-  display:flex; align-items:center; border-bottom:1px solid transparent;
-  transition:background .45s var(--ease), border-color .45s var(--ease), backdrop-filter .45s var(--ease);
+  position:fixed; top:0; left:0; right:0; z-index:50;
+  display:flex; align-items:center; padding:clamp(10px,1.4vw,18px) var(--gut);
 }
-.nav.solid{ background:rgba(10,10,13,.72); backdrop-filter:blur(20px) saturate(150%); -webkit-backdrop-filter:blur(20px) saturate(150%); border-bottom-color:var(--line); }
-.nav-in{ width:100%; max-width:var(--maxw); margin:0 auto; padding-inline:var(--gut); display:flex; align-items:center; gap:34px; }
+.nav-in{
+  position:relative; width:100%; max-width:calc(var(--maxw) - var(--gut)); margin:0 auto;
+  display:flex; align-items:center; gap:34px; height:60px; padding:0 10px 0 20px;
+  border-radius:var(--r-pill);
+  background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.1);
+  backdrop-filter:blur(22px) saturate(160%); -webkit-backdrop-filter:blur(22px) saturate(160%);
+  /* the bevel: a lit top edge, a shaded bottom edge, and a cast shadow */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -1px 0 rgba(0,0,0,.4),
+    0 18px 44px -18px rgba(0,0,0,.7);
+  transition:background .45s var(--ease), border-color .45s var(--ease), box-shadow .45s var(--ease);
+}
+.nav.solid .nav-in{
+  background:linear-gradient(180deg, rgba(24,24,30,.86), rgba(14,14,18,.8));
+  border-color:rgba(255,255,255,.13);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.26),
+    inset 0 -1px 0 rgba(0,0,0,.5),
+    0 22px 54px -20px rgba(0,0,0,.8);
+}
+@media (prefers-reduced-transparency: reduce){
+  .nav-in{ background:rgba(14,14,18,.97); backdrop-filter:none; -webkit-backdrop-filter:none; }
+}
 .nav-logo{ display:flex; align-items:center; gap:10px; margin-right:auto; font-family:var(--disp); font-weight:800; font-size:17px; letter-spacing:-.03em; }
 .nav-logo .mark{ height:21px; width:auto; display:block; }
 .nav-logo span{ display:block; }
@@ -207,12 +229,13 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
 .nav-burger{ display:none; padding:8px; margin-right:-8px; color:var(--text); }
 @media (max-width:880px){ .nav-links,.nav-cta{ display:none; } .nav-burger{ display:block; } }
 .sheet{
-  position:fixed; inset:72px 0 auto 0; z-index:49; background:rgba(10,10,13,.97);
+  position:fixed; inset:88px 0 auto 0; z-index:49; background:rgba(10,10,13,.97);
   backdrop-filter:blur(22px); border-bottom:1px solid var(--line);
   display:flex; flex-direction:column; padding:8px var(--gut) 22px;
 }
 .sheet[hidden]{ display:none; }
 @media (min-width:881px){ .sheet{ display:none; } }
+.sheet{ border-radius:var(--r); margin-inline:var(--gut); inset-inline:0; }
 .sheet a{ padding:15px 0; font-size:17px; border-bottom:1px solid var(--line-soft); }
 .sheet a:last-child{ border-bottom:0; color:var(--accent); }
 
@@ -374,7 +397,21 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
 }
 
 /* ============================== INDEX PAN (family D: horizontal) ============================== */
-.pan{ position:relative; overflow:hidden; background:var(--surface); border-block:1px solid var(--line); }
+.pan{
+  position:relative; overflow:hidden; border-block:1px solid var(--line);
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0 1px, transparent 1px 96px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.028) 0 1px, transparent 1px 96px),
+    linear-gradient(180deg, #0b0b0f, #14141a 42%, #0b0b0f);
+}
+/* the word sits behind the row and drifts against it */
+.pan-word{
+  position:absolute; left:0; top:50%; translate:0 -50%; z-index:0; white-space:nowrap;
+  font-family:var(--disp); font-weight:800; font-size:clamp(9rem,24vw,20rem); line-height:.8;
+  letter-spacing:-.06em; color:transparent; -webkit-text-stroke:1px rgba(255,255,255,.1);
+  pointer-events:none; user-select:none;
+}
+.pan-track{ position:relative; z-index:1; }
 .pan-track{ display:flex; align-items:center; gap:clamp(16px,2.2vw,32px); height:100dvh; padding-inline:var(--gut); width:max-content; }
 .pan-intro{ flex:none; width:min(76vw,400px); padding-right:clamp(16px,3vw,44px); }
 .pan-intro h2{ font-size:clamp(2rem,4.4vw,3.2rem); letter-spacing:-.05em; }
@@ -432,98 +469,186 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
   .card, .card:nth-of-type(odd), .card:nth-of-type(even){ width:auto; height:320px; margin:0; align-self:auto; }
 }
 
-/* ============================== CRAFT (family E: pinned header, scrolling answers) ============================== */
-.craft-grid{ display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:clamp(30px,6vw,90px); align-items:start; }
-.craft-stick{ position:sticky; top:136px; }
-.craft-fig{ font-family:var(--disp); font-weight:800; font-size:clamp(3.6rem,10vw,8rem); letter-spacing:-.06em; line-height:.84; color:var(--accent); }
-.craft-fig small{ display:block; font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint); margin-top:18px; font-weight:500; line-height:1.6; }
-.craft-list{ display:flex; flex-direction:column; }
-.craft-item{ position:relative; padding:clamp(26px,3.4vw,44px) 0; border-top:1px solid var(--line); }
-.craft-item:last-child{ border-bottom:1px solid var(--line); }
-.craft-item h3{ font-size:clamp(1.3rem,2.4vw,1.9rem); letter-spacing:-.035em; margin-bottom:14px; transition:color .35s var(--ease); }
-.craft-item p{ color:var(--text-dim); font-size:15px; max-width:56ch; }
-.craft-item::before{
-  content:''; position:absolute; left:0; top:-1px; height:1px; width:100%; background:var(--accent);
-  transform:scaleX(0); transform-origin:0 50%; transition:transform .55s var(--ease-io);
+/* ============================== CRAFT (family E: held panel, passing steps) ==============================
+   The panel on the left holds while the five steps pass on the right, swapping
+   to the build that shows the step being read. A rule down the gutter fills as
+   you move through, so the section reads as a process with a position in it. */
+.craft-grid{ display:grid; grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr); gap:clamp(28px,5vw,80px); align-items:start; }
+.craft-stick{ position:sticky; top:132px; }
+.craft-media{
+  position:relative; aspect-ratio:4/5; border-radius:var(--r); overflow:hidden;
+  background:var(--surface-2);
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -1px 0 rgba(0,0,0,.45),
+    0 30px 70px -30px rgba(0,0,0,.85);
 }
-.craft-item:hover::before{ transform:scaleX(1); }
-.craft-item:hover h3{ color:var(--accent); }
-.craft-shot{ margin-top:24px; border-radius:var(--r); overflow:hidden; aspect-ratio:16/9; }
-.craft-shot img{ width:100%; height:100%; object-fit:cover; transition:transform .9s var(--ease); }
-.craft-item:hover .craft-shot img{ transform:scale(1.04); }
+.craft-media img{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  opacity:0; transform:scale(1.06); transition:opacity .8s var(--ease), transform 1.3s var(--ease);
+}
+.craft-media img.on{ opacity:1; transform:none; }
+.craft-figs{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(14px,1.6vw,22px); margin-top:clamp(16px,2vw,24px); }
+.craft-figs > div{ border-top:1px solid var(--line); padding-top:16px; }
+.craft-figs b{ display:block; font-family:var(--disp); font-weight:800; font-size:clamp(2.2rem,4.4vw,3.4rem); letter-spacing:-.055em; line-height:.86; color:var(--accent); }
+.craft-figs small{ display:block; font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-faint); margin-top:10px; line-height:1.7; }
+
+.craft-list{ position:relative; padding-left:clamp(20px,3vw,44px); }
+/* the fill rail: where you are in the five */
+.craft-progress{ position:absolute; left:0; top:0; bottom:0; width:1px; background:var(--line); }
+.craft-progress i{ display:block; width:100%; height:0; background:var(--accent); transition:height .6s var(--ease); }
+
+.step{
+  position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:clamp(16px,2vw,30px);
+  padding:clamp(26px,3.4vw,46px) 0; border-top:1px solid var(--line);
+}
+.step:first-child{ border-top:0; padding-top:0; }
+.step:last-child{ padding-bottom:0; }
+.step-n{
+  font-family:var(--mono); font-size:11px; letter-spacing:.16em; color:var(--text-faint);
+  padding-top:.5em; transition:color .4s var(--ease);
+}
+.step-k{ display:block; color:var(--text-faint); transition:color .4s var(--ease); }
+.step h3{ font-size:clamp(1.35rem,2.5vw,2rem); letter-spacing:-.04em; margin:12px 0 14px; transition:color .4s var(--ease); }
+.step p{ color:var(--text-dim); font-size:15px; max-width:54ch; transition:color .4s var(--ease); }
+/* the step being read lights up; the others stay legible but recede */
+.step.on .step-n, .step.on .step-k{ color:var(--accent); }
+.step.on p{ color:var(--text); }
+.step:not(.on){ opacity:.62; transition:opacity .5s var(--ease); }
+.step.on{ opacity:1; }
+
 @media (max-width:900px){
-  .craft-grid{ grid-template-columns:1fr; gap:36px; }
+  .craft-grid{ grid-template-columns:1fr; gap:34px; }
   .craft-stick{ position:static; }
+  .craft-list{ padding-left:22px; }
+  .step:not(.on){ opacity:1; }
+}
+@media (prefers-reduced-motion: reduce){
+  .craft-media img{ transition:none; }
+  .step:not(.on){ opacity:1; }
 }
 
 /* ============================== CLIENTS (family F: quote wall) ==============================
-   Eight short quotes plus the rating they average to. A flat three column grid
-   made them all look equally weighted, which is the opposite of what a wall of
-   praise should do. One lead quote carries the section, the rating is a piece of
-   type rather than a badge, and the rest sit beneath in a measured grid. */
-.wall{ display:grid; grid-template-columns:repeat(12,1fr); gap:clamp(12px,1.4vw,20px); }
-.wall > *{ min-width:0; }
-.w-4{ grid-column:span 4; } .w-8{ grid-column:span 8; } .w-12{ grid-column:span 12; }
+   A fixed grid gave every row the height of its tallest card, which is what
+   spread the short quotes so far apart. The supporting quotes flow in packed
+   columns instead, so each card is only as tall as its own text. */
+.wall-top{ display:grid; grid-template-columns:minmax(0,4fr) minmax(0,8fr); gap:clamp(12px,1.4vw,20px); margin-bottom:clamp(12px,1.4vw,20px); }
+.wall-rest{ columns:3; column-gap:clamp(12px,1.4vw,20px); }
+.wall-rest .quote{ break-inside:avoid; margin-bottom:clamp(12px,1.4vw,20px); }
+@media (max-width:1000px){ .wall-top{ grid-template-columns:1fr; } .wall-rest{ columns:2; } }
+@media (max-width:640px){ .wall-rest{ columns:1; } }
 
 .quote{
-  position:relative; border:1px solid var(--line); border-radius:var(--r); padding:clamp(22px,2.2vw,30px);
+  position:relative; border:1px solid var(--line); border-radius:var(--r); padding:clamp(20px,2vw,26px);
   background:rgba(22,22,28,.6); backdrop-filter:blur(10px); overflow:hidden;
   transition:border-color .45s var(--ease), background .45s var(--ease);
 }
-/* the lime hairline draws in from the left rather than the whole card lifting */
+/* the lime hairline draws down the edge rather than the whole card lifting */
 .quote::before{
   content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--accent);
   transform:scaleY(0); transform-origin:50% 0; transition:transform .5s var(--ease-io);
 }
 .quote:hover{ border-color:rgba(204,255,51,.4); background:rgba(26,26,33,.78); }
 .quote:hover::before{ transform:scaleY(1); }
-.quote p{ font-size:15px; color:var(--text); line-height:1.62; }
-.quote-by{ display:flex; align-items:center; gap:11px; margin-top:22px; }
-.quote-by img{ width:34px; height:34px; border-radius:var(--r-pill); object-fit:cover; }
-.quote-name{ font-size:14px; font-weight:500; }
+.quote p{ font-size:14.5px; color:var(--text); line-height:1.6; }
+.quote-by{ display:flex; align-items:center; gap:11px; margin-top:18px; }
+.quote-by img{ width:32px; height:32px; border-radius:var(--r-pill); object-fit:cover; }
+.quote-name{ font-size:13.5px; font-weight:500; }
 .quote-role{ font-size:12px; color:var(--text-faint); }
-.stars{ display:flex; gap:3px; color:var(--accent); margin-bottom:16px; }
+.stars{ display:flex; gap:3px; color:var(--accent); margin-bottom:14px; }
 
 /* the lead quote is set in display type, because it is the one that gets read */
-.quote.lead{ display:flex; flex-direction:column; justify-content:space-between; }
+.quote.lead{ display:flex; flex-direction:column; justify-content:space-between; padding:clamp(24px,2.6vw,38px); }
 .quote.lead p{
   font-family:var(--disp); font-weight:700; font-size:clamp(1.4rem,2.9vw,2.3rem);
   line-height:1.1; letter-spacing:-.035em;
 }
-.quote.wide p{ font-family:var(--disp); font-weight:700; font-size:clamp(1.15rem,2vw,1.6rem); line-height:1.18; letter-spacing:-.03em; }
 
 /* the average, as type rather than a badge */
 .wall-score{
-  border:1px solid rgba(204,255,51,.28); border-radius:var(--r); padding:clamp(22px,2.2vw,30px);
-  background:linear-gradient(155deg, rgba(204,255,51,.12), rgba(16,16,21,.9) 62%);
-  display:flex; flex-direction:column; justify-content:space-between; gap:20px;
+  border:1px solid rgba(204,255,51,.28); border-radius:var(--r); padding:clamp(24px,2.6vw,32px);
+  background:linear-gradient(155deg, rgba(204,255,51,.13), rgba(16,16,21,.9) 62%);
+  display:flex; flex-direction:column; justify-content:center; gap:14px;
 }
+.wall-score .stars{ margin:0; }
 .wall-score b{
   display:block; font-family:var(--disp); font-weight:800; color:var(--accent);
-  font-size:clamp(3.4rem,7vw,5.6rem); letter-spacing:-.06em; line-height:.84;
+  font-size:clamp(3.4rem,7vw,5.4rem); letter-spacing:-.06em; line-height:.84;
 }
 .wall-score small{ font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-dim); line-height:1.7; }
-@media (max-width:1000px){ .w-4{ grid-column:span 6; } .w-8{ grid-column:span 12; } }
-@media (max-width:640px){ .w-4,.w-8,.w-12{ grid-column:span 12; } }
 
 .tools{ display:flex; flex-wrap:wrap; gap:12px; }
 .tool{ display:flex; align-items:center; gap:11px; border:1px solid var(--line); border-radius:var(--r-pill); padding:11px 20px; font-size:13.5px; color:var(--text-dim); transition:border-color .25s, color .25s; }
 .tool:hover{ border-color:var(--accent); color:var(--text); }
 .tool img, .tool svg{ width:19px; height:19px; opacity:.85; }
 
-/* ============================== CONTACT (family G) ============================== */
-.start-head h2{ font-size:clamp(2.6rem,8vw,6.4rem); letter-spacing:-.055em; max-width:12ch; }
+/* ============================== CONTACT (family G: one console panel) ==============================
+   Previously a headline over two loose columns, which read as a page that had
+   run out of ideas. It is now a single beveled panel, split into the ask on the
+   left and the state of things on the right, using the same raised edge as the
+   top bar so the two bookend the page. */
+.start-head h2{ font-size:clamp(2.8rem,9vw,7rem); letter-spacing:-.06em; max-width:12ch; }
 .start-head h2 em{ font-style:normal; color:var(--accent); }
-.start-grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:clamp(30px,4.5vw,68px); align-items:start; margin-top:clamp(44px,7vh,80px); }
-@media (max-width:960px){ .start-grid{ grid-template-columns:1fr; } }
+
+.console{
+  margin-top:clamp(40px,6vh,72px);
+  display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);
+  border-radius:var(--r); overflow:hidden;
+  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+  border:1px solid rgba(255,255,255,.1);
+  backdrop-filter:blur(18px) saturate(150%); -webkit-backdrop-filter:blur(18px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.2),
+    inset 0 -1px 0 rgba(0,0,0,.45),
+    0 40px 90px -40px rgba(0,0,0,.9);
+}
+.console-main{ padding:clamp(26px,3.4vw,48px); }
+.console-side{
+  padding:clamp(26px,3.4vw,40px);
+  border-left:1px solid rgba(255,255,255,.09);
+  background:rgba(0,0,0,.22);
+  display:flex; flex-direction:column; gap:22px;
+}
+@media (max-width:960px){
+  .console{ grid-template-columns:1fr; }
+  .console-side{ border-left:0; border-top:1px solid rgba(255,255,255,.09); }
+}
+@media (prefers-reduced-transparency: reduce){
+  .console{ background:rgba(18,18,23,.98); backdrop-filter:none; -webkit-backdrop-filter:none; }
+}
+
 .start-lede{ color:var(--text-dim); max-width:46ch; font-size:16.5px; }
-.scope{ margin-top:36px; display:grid; gap:1px; background:var(--line-soft); border-radius:var(--r); overflow:hidden; }
-.scope-row{ background:rgba(16,16,21,.86); padding:22px; display:flex; align-items:baseline; gap:20px; flex-wrap:wrap; transition:background .3s; }
-.scope-row:hover{ background:var(--surface-2); }
-.scope-row strong{ font-weight:600; font-size:15px; min-width:160px; }
-.scope-row span{ color:var(--text-dim); font-size:14px; flex:1; min-width:210px; }
-.avail{ display:inline-flex; align-items:center; gap:9px; font-size:13.5px; color:var(--text-dim); margin-top:28px; }
-.dot{ width:7px; height:7px; border-radius:var(--r-pill); background:var(--live); box-shadow:0 0 0 4px rgba(53,208,127,.14); }
+
+/* the scope list: three real rows, each one a target rather than a table row */
+.scope{ margin-top:clamp(26px,3vw,38px); display:flex; flex-direction:column; }
+.scope-row{
+  position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:clamp(14px,2vw,26px);
+  padding:clamp(18px,2vw,24px) 0; border-top:1px solid var(--line); align-items:baseline;
+}
+.scope-row:last-child{ border-bottom:1px solid var(--line); }
+.scope-row::before{
+  content:''; position:absolute; left:0; right:0; top:-1px; height:1px; background:var(--accent);
+  transform:scaleX(0); transform-origin:0 50%; transition:transform .55s var(--ease-io);
+}
+.scope-row:hover::before{ transform:scaleX(1); }
+.scope-n{ font-family:var(--mono); font-size:11px; letter-spacing:.16em; color:var(--text-faint); transition:color .35s var(--ease); }
+.scope-row:hover .scope-n{ color:var(--accent); }
+.scope-row strong{ display:block; font-family:var(--disp); font-weight:700; font-size:clamp(1.1rem,1.9vw,1.35rem); letter-spacing:-.03em; margin-bottom:7px; }
+.scope-row span{ color:var(--text-dim); font-size:14.5px; }
+
+/* the clock. Real information, and it tells a client whether a reply is
+   likely in the next hour without me claiming a response time I have not
+   agreed to. */
+.clock{ display:flex; flex-direction:column; gap:8px; }
+.clock b{
+  font-family:var(--disp); font-weight:800; font-size:clamp(2.6rem,5.4vw,3.8rem);
+  letter-spacing:-.055em; line-height:.9; font-variant-numeric:tabular-nums;
+}
+.clock b span{ color:var(--accent); }
+.clock-z{ font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint); }
+.avail{ display:inline-flex; align-items:center; gap:9px; font-size:13.5px; color:var(--text-dim); margin:0; }
+.dot{ width:7px; height:7px; border-radius:var(--r-pill); background:var(--live); box-shadow:0 0 0 4px rgba(53,208,127,.14); flex:none; }
 
 /* ============================== DISCORD CARD ============================== */
 .dc{ border:1px solid var(--line); border-radius:var(--r); background:rgba(22,22,28,.74); backdrop-filter:blur(12px); overflow:hidden; }
