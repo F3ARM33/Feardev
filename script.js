@@ -421,7 +421,9 @@ function renderWork() {
 
 /* ============================== INDEX: HORIZONTAL PAN ==============================
    The back catalogue. A different layout family from the reel, and it shows the
-   breadth in one screen instead of six more. */
+   breadth in one screen instead of six more. Each card carries its index, its
+   shot count as a fill bar, and a second shot that cross fades in under the
+   cursor, so hovering the row actually shows you more of the build. */
 
 function renderIndex() {
   const mount = document.getElementById("indexMount");
@@ -429,18 +431,22 @@ function renderIndex() {
 
   PROJECTS.slice(FEATURED_COUNT).forEach((p, n) => {
     const i = n + FEATURED_COUNT;
+    const alt = p.images[1] || p.images[0];
     mount.appendChild(
       el(`
       <article class="card" data-card="${i}">
         <div class="card-media">
-          <img src="${p.images[0]}" alt="${esc(p.name)}" loading="lazy" width="960" height="640" />
+          <img class="a" src="${p.images[0]}" alt="${esc(p.name)}" loading="lazy" width="960" height="640" />
+          <img class="b" src="${alt}" alt="" loading="lazy" width="960" height="640" aria-hidden="true" />
         </div>
+        <span class="card-ix" aria-hidden="true">${String(i + 1).padStart(2, "0")}</span>
         <span class="card-go" aria-hidden="true">${I_ARROW}</span>
         <div class="card-cap">
-          <span class="mono">${esc(p.year)}</span>
+          <span class="mono">${esc(p.year)} &nbsp;/&nbsp; ${p.count} shots</span>
           <h3>${esc(p.name)}</h3>
           ${tagsHTML(p.tags)}
         </div>
+        <span class="card-shots" aria-hidden="true"><i></i></span>
         <button class="sr" type="button">Open project: ${esc(p.name)}</button>
       </article>
     `)
@@ -473,16 +479,26 @@ function renderCraft() {
   });
 }
 
-/* ============================== REVIEWS ==============================
-   Offset columns rather than a second marquee. One marquee per page, and the
-   ticker already spent it. */
+/* ============================== REVIEWS: THE QUOTE WALL ==============================
+   Eight short quotes laid out in equal columns read as eight equal cards, which
+   flattens them. Here one lead quote is set in display type and carries the
+   section, the average sits beside it as a piece of type rather than a badge,
+   and the rest fall into a measured grid beneath. The average is computed from
+   the data, so it can never drift from the reviews actually on the page. */
 
 function renderReviews() {
   const mount = document.getElementById("voicesMount");
-  const card = (r) => `
-    <figure class="quote" style="margin:0">
-      <div class="stars" aria-label="${r.rating} out of 5">${[1, 2, 3, 4, 5].map((n) => I_STAR(n <= r.rating)).join("")}</div>
-      <p>${esc(r.quote)}</p>
+  if (!mount) return;
+
+  const avg = REVIEWS.reduce((t, r) => t + r.rating, 0) / REVIEWS.length;
+  const fives = REVIEWS.filter((r) => r.rating === 5).length;
+
+  const quote = (r, cls) => `
+    <figure class="quote ${cls}">
+      <div>
+        <div class="stars" aria-label="${r.rating} out of 5">${[1, 2, 3, 4, 5].map((n) => I_STAR(n <= r.rating)).join("")}</div>
+        <p>${esc(r.quote)}</p>
+      </div>
       <figcaption class="quote-by">
         <img src="${r.avatar}" alt="" loading="lazy" width="34" height="34" />
         <span>
@@ -492,9 +508,24 @@ function renderReviews() {
       </figcaption>
     </figure>`;
 
-  const cols = [[], [], []];
-  REVIEWS.forEach((r, i) => cols[i % 3].push(card(r)));
-  mount.innerHTML = cols.map((c) => `<div>${c.join("")}</div>`).join("");
+  // The longest quote leads, because it is the one that says the most.
+  const rest = [...REVIEWS];
+  const leadIx = rest.reduce((best, r, i) => (r.quote.length > rest[best].quote.length ? i : best), 0);
+  const lead = rest.splice(leadIx, 1)[0];
+  const wide = rest.pop();
+
+  const score = `
+    <div class="wall-score w-4">
+      <div class="stars" aria-hidden="true">${[1,2,3,4,5].map(() => I_STAR(true)).join("")}</div>
+      <b>${avg.toFixed(1)}</b>
+      <small>Average rating<br />${fives} of ${REVIEWS.length} at five stars</small>
+    </div>`;
+
+  mount.innerHTML =
+    score +
+    `<div class="w-8">${quote(lead, "lead")}</div>` +
+    rest.map((r) => `<div class="w-4">${quote(r, "")}</div>`).join("") +
+    `<div class="w-12">${quote(wide, "wide")}</div>`;
 }
 
 /* ============================== TOOLS ============================== */
@@ -1074,6 +1105,30 @@ function setupPointer() {
     });
   });
 
+  // Shelf cards tilt toward the cursor. Depth on hover is the difference
+  // between a row of thumbnails and a row you want to reach into.
+  document.querySelectorAll(".card").forEach((card) => {
+    let raf = 0;
+    card.addEventListener("pointerenter", () => card.classList.add("tilting"));
+    card.addEventListener("pointermove", (e) => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        card.style.setProperty("--ry", `${px * 7}deg`);
+        card.style.setProperty("--rx", `${-py * 7}deg`);
+      });
+    });
+    card.addEventListener("pointerleave", () => {
+      if (raf) { cancelAnimationFrame(raf); raf = 0; }
+      card.classList.remove("tilting");
+      card.style.setProperty("--rx", "0deg");
+      card.style.setProperty("--ry", "0deg");
+    });
+  });
+
   document.querySelectorAll(".slab").forEach((slab) => {
     let raf = 0;
     slab.addEventListener("pointermove", (e) => {
@@ -1130,31 +1185,68 @@ function setupMotion() {
     scrollTrigger: { trigger: ".hero", start: "top top", end: "72% top", scrub: true },
   });
 
-  /* -- THE REEL. Each build scales back and dims as the next rises over it, so
-        six panels read as one continuous handoff rather than six pages. -- */
+  /* -- THE REEL.
+        Arriving, a build opens: the slab is clipped to a narrow vertical slot
+        in the middle of the screen and widens to full frame as it takes over,
+        while its image settles from an over scale. Leaving, it does not simply
+        shrink. It tips away from you and drops back into the stack, so the six
+        panels read as one deck being dealt rather than six pages sliding. All
+        of it is transform, opacity and an inset clip, so it stays on the
+        compositor. -- */
   const panels = gsap.utils.toArray(".panel");
   panels.forEach((panel, i) => {
+    const slab = panel.querySelector(".slab");
     const img = panel.querySelector(".slab-media img");
+    const cap = panel.querySelector(".slab-cap");
     const num = panel.querySelector(".panel-n");
 
+    // opening: the slot widens into the full frame
+    gsap.fromTo(
+      slab,
+      { clipPath: "inset(0% 44% 0% 44%)" },
+      {
+        clipPath: "inset(0% 0% 0% 0%)",
+        ease: "power2.out",
+        scrollTrigger: { trigger: panel, start: "top bottom", end: "top 12%", scrub: true },
+      }
+    );
     gsap.fromTo(
       img,
-      { scale: 1.2 },
+      { scale: 1.32 },
       { scale: 1, ease: "none", scrollTrigger: { trigger: panel, start: "top bottom", end: "top top", scrub: true } }
     );
+    // the caption arrives last, once the frame is open enough to hold it
+    if (cap) {
+      gsap.fromTo(
+        cap,
+        { y: 46, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          ease: "power2.out",
+          scrollTrigger: { trigger: panel, start: "top 62%", end: "top 12%", scrub: true },
+        }
+      );
+    }
     // the ghost numeral drifts against the slab, which gives the panel depth
     if (num) {
       gsap.fromTo(
         num,
-        { yPercent: 14 },
-        { yPercent: -14, ease: "none", scrollTrigger: { trigger: panel, start: "top bottom", end: "bottom top", scrub: true } }
+        { yPercent: 16 },
+        { yPercent: -16, ease: "none", scrollTrigger: { trigger: panel, start: "top bottom", end: "bottom top", scrub: true } }
       );
     }
+
+    // leaving: tip away and drop back into the deck
     if (i < panels.length - 1) {
       gsap.to(panel, {
-        scale: 0.9,
-        opacity: 0.22,
-        ease: "none",
+        scale: 0.86,
+        rotationX: 10,
+        yPercent: -4,
+        opacity: 0.18,
+        transformPerspective: 1600,
+        transformOrigin: "50% 100%",
+        ease: "power1.in",
         scrollTrigger: { trigger: panels[i + 1], start: "top bottom", end: "top top", scrub: true },
       });
     }

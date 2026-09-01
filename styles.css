@@ -1,4 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap');
+/* Fallback metrics matched to Bricolage Grotesque. Without these the headline
+   visibly resizes when the webfont lands, which reads as the page glitching. */
+@font-face{
+  font-family: "Bricolage Fallback";
+  src: local("Arial Bold"), local("Helvetica Bold"), local("Segoe UI Bold");
+  font-weight: 700 800;
+  ascent-override: 92%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+  size-adjust: 105%;
+}
+@font-face{
+  font-family: "Geist Fallback";
+  src: local("Segoe UI"), local("Helvetica"), local("Arial");
+  ascent-override: 95%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+  size-adjust: 100%;
+}
 
 /* ==========================================================================
    f34r.dev
@@ -43,22 +61,25 @@
 
   --maxw: 1400px;
   --gut:  clamp(20px, 5vw, 72px);
-  --disp: 'Bricolage Grotesque', 'Geist', ui-sans-serif, system-ui, sans-serif;
-  --font: 'Geist', ui-sans-serif, 'Segoe UI', system-ui, sans-serif;
+  --disp: 'Bricolage Grotesque', 'Bricolage Fallback', ui-sans-serif, system-ui, sans-serif;
+  --font: 'Geist', 'Geist Fallback', ui-sans-serif, system-ui, sans-serif;
   --mono: 'Geist Mono', ui-monospace, monospace;
   --ease: cubic-bezier(.22,1,.36,1);
   --ease-io: cubic-bezier(.76,0,.24,1);
 }
 
 *{ box-sizing:border-box; }
-html{ scroll-behavior:smooth; }
+/* clip, not hidden: overflow-x:hidden on the root turns it into a scroll
+   container, which breaks position:sticky and ScrollTrigger pinning. clip
+   stops the pin spacer from opening a horizontal scrollbar without that. */
+html{ scroll-behavior:smooth; overflow-x:clip; }
 @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
 html,body{ margin:0; padding:0; }
 body{
   background:var(--bg); color:var(--text);
   font-family:var(--font); font-size:16px; line-height:1.6;
   -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
-  overflow-x:hidden;
+  overflow-x:clip;
 }
 h1,h2,h3{ margin:0; font-family:var(--disp); font-weight:800; letter-spacing:-.04em; line-height:.94; }
 p{ margin:0; }
@@ -114,7 +135,8 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
   position:fixed; inset:0; z-index:100; background:var(--bg);
   display:grid; grid-template-rows:1fr auto; padding:0 var(--gut) clamp(26px,6vh,54px);
 }
-.boot-mark{ align-self:center; justify-self:start; overflow:hidden; }
+.boot-mark{ align-self:center; justify-self:start; display:flex; align-items:center; gap:clamp(16px,2.4vw,34px); }
+.boot-glyph{ height:clamp(3rem,11vw,9rem); width:auto; display:block; }
 .boot-mark b{
   display:block; font-family:var(--disp); font-weight:800;
   font-size:clamp(3.4rem,13vw,11rem); letter-spacing:-.06em; line-height:.86;
@@ -136,6 +158,8 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
 .rv-g.in > *:nth-child(3){ transition-delay:.16s } .rv-g.in > *:nth-child(4){ transition-delay:.23s }
 .rv-g.in > *:nth-child(5){ transition-delay:.30s } .rv-g.in > *:nth-child(6){ transition-delay:.37s }
 .rv-g.in > *:nth-child(7){ transition-delay:.44s } .rv-g.in > *:nth-child(8){ transition-delay:.51s }
+.rv-g.in > *:nth-child(9){ transition-delay:.58s } .rv-g.in > *:nth-child(10){ transition-delay:.65s }
+.rv-g.in > *:nth-child(n+11){ transition-delay:.72s }
 
 /* headline lines ride up out of their own clipped boxes */
 .ln{ display:block; overflow:hidden; padding-bottom:.12em; margin-bottom:-.12em; }
@@ -163,7 +187,10 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
 .nav.solid{ background:rgba(10,10,13,.72); backdrop-filter:blur(20px) saturate(150%); -webkit-backdrop-filter:blur(20px) saturate(150%); border-bottom-color:var(--line); }
 .nav-in{ width:100%; max-width:var(--maxw); margin:0 auto; padding-inline:var(--gut); display:flex; align-items:center; gap:34px; }
 .nav-logo{ display:flex; align-items:center; gap:10px; margin-right:auto; font-family:var(--disp); font-weight:800; font-size:17px; letter-spacing:-.03em; }
-.nav-logo img{ width:26px; height:26px; border-radius:var(--r); }
+.nav-logo .mark{ height:21px; width:auto; display:block; }
+.nav-logo span{ display:block; }
+.nav-logo:hover .mark-key{ fill:var(--text); transition:fill .3s var(--ease); }
+.mark-key{ transition:fill .3s var(--ease); }
 .nav-links{ display:flex; gap:30px; }
 .nav-links a{ position:relative; font-size:13.5px; color:var(--text-dim); transition:color .25s; }
 .nav-links a::after{
@@ -358,17 +385,39 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
   position:relative; flex:none; width:min(80vw,460px);
   border-radius:var(--r); overflow:hidden; background:var(--surface-2);
   box-shadow:0 0 0 1px rgba(255,255,255,.07); cursor:pointer; text-align:left; padding:0;
-  transition:box-shadow .45s var(--ease);
+  transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+  transition:box-shadow .45s var(--ease), transform .5s var(--ease);
 }
+.card.tilting{ transition:box-shadow .45s var(--ease); }
 /* alternating heights, so the row has a rhythm instead of being a fence */
 .card:nth-of-type(odd){ height:min(72vh,660px); align-self:flex-start; margin-top:11vh; }
 .card:nth-of-type(even){ height:min(58vh,540px); align-self:flex-end; margin-bottom:13vh; }
 .card:hover{ box-shadow:0 0 0 1px var(--accent); }
 .card:focus-within{ box-shadow:0 0 0 2px var(--accent); }
 .card-media{ position:absolute; inset:0; overflow:hidden; }
-.card-media img{ width:100%; height:114%; object-fit:cover; will-change:transform; }
+.card-media img{ position:absolute; inset:0; width:100%; height:114%; object-fit:cover; will-change:transform; }
+/* the second shot cross fades in under the cursor, so a hover shows more of the
+   build instead of just changing a border colour */
+.card-media img.b{ opacity:0; transition:opacity .55s var(--ease); }
+.card:hover .card-media img.b{ opacity:1; }
 .card-media::after{ content:''; position:absolute; inset:0; background:linear-gradient(to top, rgba(6,6,9,.95) 3%, rgba(6,6,9,.22) 58%, transparent 100%); }
-.card-cap{ position:absolute; left:0; right:0; bottom:0; z-index:2; padding:clamp(20px,2.2vw,30px); }
+.card-cap{
+  position:absolute; left:0; right:0; bottom:0; z-index:2; padding:clamp(20px,2.2vw,30px);
+  transform:translateY(12px); transition:transform .5s var(--ease);
+}
+.card:hover .card-cap{ transform:none; }
+.card-cap .tags{ opacity:0; transform:translateY(6px); transition:opacity .45s var(--ease) .06s, transform .45s var(--ease) .06s; }
+.card:hover .card-cap .tags{ opacity:1; transform:none; }
+/* index and shot count, so the row reads as a catalogue rather than a slideshow */
+.card-ix{
+  position:absolute; top:clamp(16px,2vw,24px); left:clamp(16px,2vw,24px); z-index:2;
+  font-family:var(--mono); font-size:11px; letter-spacing:.16em; color:var(--accent);
+}
+.card-shots{
+  position:absolute; left:0; right:0; bottom:0; z-index:3; height:2px; background:rgba(255,255,255,.14);
+}
+.card-shots i{ display:block; height:100%; width:0; background:var(--accent); transition:width .7s var(--ease); }
+.card:hover .card-shots i{ width:100%; }
 .card-cap h3{ font-size:clamp(1.25rem,2.2vw,1.8rem); letter-spacing:-.04em; margin:10px 0 14px; }
 .card-go{
   position:absolute; top:clamp(16px,2vw,24px); right:clamp(16px,2vw,24px); z-index:2;
@@ -407,24 +456,55 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
   .craft-stick{ position:static; }
 }
 
-/* ============================== CLIENTS (family F: offset columns) ============================== */
-.voice-cols{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(14px,1.6vw,22px); align-items:start; }
-.voice-cols > div{ display:flex; flex-direction:column; gap:clamp(14px,1.6vw,22px); }
-.voice-cols > div:nth-child(2){ margin-top:clamp(28px,5vw,64px); }
-.voice-cols > div:nth-child(3){ margin-top:clamp(14px,2.5vw,32px); }
+/* ============================== CLIENTS (family F: quote wall) ==============================
+   Eight short quotes plus the rating they average to. A flat three column grid
+   made them all look equally weighted, which is the opposite of what a wall of
+   praise should do. One lead quote carries the section, the rating is a piece of
+   type rather than a badge, and the rest sit beneath in a measured grid. */
+.wall{ display:grid; grid-template-columns:repeat(12,1fr); gap:clamp(12px,1.4vw,20px); }
+.wall > *{ min-width:0; }
+.w-4{ grid-column:span 4; } .w-8{ grid-column:span 8; } .w-12{ grid-column:span 12; }
+
 .quote{
-  border:1px solid var(--line); border-radius:var(--r); padding:26px;
-  background:rgba(22,22,28,.62); backdrop-filter:blur(10px);
-  transition:border-color .4s var(--ease), transform .4s var(--ease);
+  position:relative; border:1px solid var(--line); border-radius:var(--r); padding:clamp(22px,2.2vw,30px);
+  background:rgba(22,22,28,.6); backdrop-filter:blur(10px); overflow:hidden;
+  transition:border-color .45s var(--ease), background .45s var(--ease);
 }
-.quote:hover{ border-color:rgba(204,255,51,.45); transform:translateY(-3px); }
+/* the lime hairline draws in from the left rather than the whole card lifting */
+.quote::before{
+  content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--accent);
+  transform:scaleY(0); transform-origin:50% 0; transition:transform .5s var(--ease-io);
+}
+.quote:hover{ border-color:rgba(204,255,51,.4); background:rgba(26,26,33,.78); }
+.quote:hover::before{ transform:scaleY(1); }
 .quote p{ font-size:15px; color:var(--text); line-height:1.62; }
-.quote-by{ display:flex; align-items:center; gap:11px; margin-top:20px; }
+.quote-by{ display:flex; align-items:center; gap:11px; margin-top:22px; }
 .quote-by img{ width:34px; height:34px; border-radius:var(--r-pill); object-fit:cover; }
 .quote-name{ font-size:14px; font-weight:500; }
 .quote-role{ font-size:12px; color:var(--text-faint); }
 .stars{ display:flex; gap:3px; color:var(--accent); margin-bottom:16px; }
-@media (max-width:900px){ .voice-cols{ grid-template-columns:1fr; } .voice-cols > div{ margin-top:0 !important; } }
+
+/* the lead quote is set in display type, because it is the one that gets read */
+.quote.lead{ display:flex; flex-direction:column; justify-content:space-between; }
+.quote.lead p{
+  font-family:var(--disp); font-weight:700; font-size:clamp(1.4rem,2.9vw,2.3rem);
+  line-height:1.1; letter-spacing:-.035em;
+}
+.quote.wide p{ font-family:var(--disp); font-weight:700; font-size:clamp(1.15rem,2vw,1.6rem); line-height:1.18; letter-spacing:-.03em; }
+
+/* the average, as type rather than a badge */
+.wall-score{
+  border:1px solid rgba(204,255,51,.28); border-radius:var(--r); padding:clamp(22px,2.2vw,30px);
+  background:linear-gradient(155deg, rgba(204,255,51,.12), rgba(16,16,21,.9) 62%);
+  display:flex; flex-direction:column; justify-content:space-between; gap:20px;
+}
+.wall-score b{
+  display:block; font-family:var(--disp); font-weight:800; color:var(--accent);
+  font-size:clamp(3.4rem,7vw,5.6rem); letter-spacing:-.06em; line-height:.84;
+}
+.wall-score small{ font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-dim); line-height:1.7; }
+@media (max-width:1000px){ .w-4{ grid-column:span 6; } .w-8{ grid-column:span 12; } }
+@media (max-width:640px){ .w-4,.w-8,.w-12{ grid-column:span 12; } }
 
 .tools{ display:flex; flex-wrap:wrap; gap:12px; }
 .tool{ display:flex; align-items:center; gap:11px; border:1px solid var(--line); border-radius:var(--r-pill); padding:11px 20px; font-size:13.5px; color:var(--text-dim); transition:border-color .25s, color .25s; }

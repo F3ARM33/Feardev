@@ -29,11 +29,18 @@
 
   <link rel="canonical" href="https://f34r.dev/" />
   <title>f34r's Portfolio</title>
-  <link rel="icon" href="img/logo.webp" />
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml" />
+  <link rel="icon" href="img/favicon-32.png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preload" as="image" href="img/enchanted/2.webp" fetchpriority="high" />
+  <!-- Fonts are discovered in the head, not through an @import inside styles.css.
+       The import meant the browser could not start fetching them until the CSS had
+       already been fetched and parsed, which is what made the swap so visible. -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -46,7 +53,7 @@
 
 <!-- INTRO CURTAIN: removed by script.js after one run, or at once under reduced motion -->
 <div class="boot" id="boot" aria-hidden="true">
-  <span class="boot-mark"><b>f34<i>r</i></b></span>
+  <span class="boot-mark"><svg class="mark boot-glyph" viewBox="0 0 24 33" fill="none" aria-hidden="true"><rect x="0" y="0" width="6" height="33" fill="currentColor"/><rect x="9" y="0" width="15" height="6" fill="currentColor"/><rect class="mark-key" x="9" y="13.5" width="6" height="6" fill="var(--accent)"/></svg><b>f34<i>r</i></b></span>
   <div class="boot-row">
     <span class="boot-l">Roblox environment design</span>
     <span class="boot-n" id="bootN">000</span>
@@ -57,7 +64,7 @@
 <!-- NAV -->
 <nav class="nav" id="nav">
   <div class="nav-in">
-    <a class="nav-logo" href="#top"><img src="img/logo.webp" alt="" width="26" height="26" />f34r</a>
+    <a class="nav-logo" href="#top" aria-label="f34r, home"><svg class="mark" viewBox="0 0 24 33" fill="none" aria-hidden="true"><rect x="0" y="0" width="6" height="33" fill="currentColor"/><rect x="9" y="0" width="15" height="6" fill="currentColor"/><rect class="mark-key" x="9" y="13.5" width="6" height="6" fill="var(--accent)"/></svg><span>f34r</span></a>
     <div class="nav-links">
       <a href="#work">Work</a>
       <a href="#craft">Craft</a>
@@ -148,7 +155,7 @@
       <h2>What clients <em>say</em>.</h2>
       <div class="rule"></div>
     </div>
-    <div class="voice-cols rv-g" id="voicesMount"></div>
+    <div class="wall rv-g" id="voicesMount"></div>
     <div class="rv" style="margin-top:clamp(60px,9vh,110px)">
       <h3 style="font-size:clamp(1.2rem,2.2vw,1.6rem);margin-bottom:22px">Built with</h3>
       <div class="tools" id="toolsMount"></div>
