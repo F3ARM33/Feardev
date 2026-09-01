@@ -68,7 +68,7 @@
     <img src="img/astral-lounge/1.webp" alt="Art deco lounge interior built in Roblox Studio" width="1600" height="805" fetchpriority="high" />
   </div>
   <div class="hero-in">
-    <h1>Worlds that hold up<br />at 400 million visits.</h1>
+    <h1 id="heroH1"><span class="ln"><span>Worlds that hold up</span></span><span class="ln"><span>at 400 million visits.</span></span></h1>
     <p class="hero-sub">I build interiors, terrain, and full environments for Roblox games. Detailed enough to sell the world, light enough to run on a phone.</p>
     <div class="hero-ctas">
       <a href="#work" class="btn btn-solid">See the work
@@ -94,7 +94,11 @@
       <p>Every one of these shipped into a live game. Open any project for the full set of shots.</p>
     </div>
   </div>
-  <div class="wrap" id="workMount"></div>
+  <div class="stack" id="workMount"></div>
+  <div class="stack-hud" id="stackHud" aria-hidden="true">
+    <span class="cur">01</span><span class="tot">/ 10</span>
+    <span class="stack-bar"><i></i></span>
+  </div>
 </section>
 
 <!-- CRAFT -->
@@ -136,6 +140,8 @@
   <a href="https://discord.com/users/1088022144308486176" target="_blank" rel="noreferrer">Discord</a>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="script.js"></script>
 
 <!-- Vercel Web Analytics (static HTML, no npm package needed) -->

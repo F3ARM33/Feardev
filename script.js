@@ -284,53 +284,38 @@ function setupNav() {
   }
 }
 
-/* ============================== WORK ============================== */
-/* Layout: one full-bleed lead project, then an asymmetric grid.
-   Rhythm is 3+3 / 2+2+2 / 3+3 so no row repeats the one above it. */
-
-const GRID_SPANS = ["wide", "wide", "", "", "", "wide", "wide", "", ""];
+/* ============================== WORK: PINNED STACK ============================== */
+/* Every build gets the whole viewport. Scrolling scales the current one back and
+   dims it while the next rises over it, so the set reads as one continuous reel
+   instead of a wall of thumbnails. */
 
 function renderWork() {
   const mount = document.getElementById("workMount");
-  const [lead, ...rest] = PROJECTS;
+  const total = String(PROJECTS.length).padStart(2, "0");
 
-  const leadNode = el(`
-    <button class="lead rv" type="button" data-i="0" aria-label="Open project: ${esc(lead.name)}">
-      <div class="lead-media">
-        <img src="${lead.images[0]}" alt="${esc(lead.name)}" loading="eager" width="1600" height="800" />
-        <span class="shots">${lead.count} shots</span>
-      </div>
-      <div class="lead-cap">
-        <div>
-          <span class="mono">${esc(lead.year)} &nbsp;/&nbsp; ${esc(lead.role)}</span>
-          <h3>${esc(lead.name)}</h3>
-          ${tagsHTML(lead.tags)}
-        </div>
-        <span class="open-cue">Open project ${I_ARROW}</span>
-      </div>
-    </button>
-  `);
-  mount.appendChild(leadNode);
-
-  const grid = el('<div class="grid"></div>');
-  rest.forEach((p, i) => {
-    const idx = i + 1;
-    grid.appendChild(
+  PROJECTS.forEach((p, i) => {
+    mount.appendChild(
       el(`
-      <button class="card rv ${GRID_SPANS[i] || ""}" type="button" data-i="${idx}" aria-label="Open project: ${esc(p.name)}">
-        <div class="card-media">
-          <img src="${p.images[0]}" alt="${esc(p.name)}" loading="lazy" width="1600" height="800" />
-          <span class="shots">${p.count}</span>
-        </div>
-        <div class="card-cap">
-          <h3>${esc(p.name)}</h3>
-          ${tagsHTML(p.tags.slice(0, 2))}
-        </div>
-      </button>
+      <div class="panel" data-panel="${i}">
+        <article class="slab">
+          <div class="slab-media">
+            <img src="${p.images[0]}" alt="${esc(p.name)}" loading="${i < 2 ? "eager" : "lazy"}" width="1600" height="800" />
+          </div>
+          <span class="slab-num">${String(i + 1).padStart(2, "0")} / ${total}</span>
+          <span class="slab-shots">${p.count} shots</span>
+          <div class="slab-cap">
+            <div>
+              <span class="mono">${esc(p.year)} &nbsp;/&nbsp; ${esc(p.role)}</span>
+              <h3>${esc(p.name)}</h3>
+              ${tagsHTML(p.tags)}
+            </div>
+            <button class="open-cue" type="button" data-i="${i}">Open project<span class="sr">: ${esc(p.name)}</span> ${I_ARROW}</button>
+          </div>
+        </article>
+      </div>
     `)
     );
   });
-  mount.appendChild(grid);
 
   mount.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-i]");
@@ -867,6 +852,169 @@ function setupDiscordCard() {
 
   connect();
 }
+
+/* ============================== MOTION LAYER (GSAP ScrollTrigger) ============================== */
+/* Everything here is gated on prefers-reduced-motion and on GSAP actually
+   having loaded. If the CDN is blocked the page still renders and works,
+   it just sits still. */
+
+function setupMotion() {
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const hasGSAP = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
+
+  if (reduce || !hasGSAP) {
+    // Static fallback: put the masked headline lines back where they belong.
+    document.querySelectorAll(".ln > span").forEach((s) => (s.style.transform = "none"));
+    document.querySelectorAll(".wipe").forEach((n) => n.classList.remove("wipe"));
+    return;
+  }
+
+  gsap.registerPlugin(ScrollTrigger);
+  const EASE = "power3.out";
+
+  /* -- Hero entrance. Storytelling: the name lands, then the supporting copy. -- */
+  const intro = gsap.timeline({ defaults: { ease: EASE } });
+  intro
+    .to(".hero-media img", { scale: 1, duration: 2.2, ease: "power2.out" }, 0)
+    .to("#heroH1 .ln > span", { y: "0%", duration: 1.15, stagger: 0.09 }, 0.15)
+    .from(".hero-sub", { y: 22, opacity: 0, duration: 0.9 }, 0.62)
+    .from(".hero-ctas > *", { y: 18, opacity: 0, duration: 0.75, stagger: 0.08 }, 0.75);
+
+  /* -- Hero parallax. Hierarchy: the copy leaves before the image does, so the
+        build stays on screen as the reader moves down into the work. -- */
+  gsap.to(".hero-media img", {
+    yPercent: 14,
+    scale: 1.12,
+    ease: "none",
+    scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
+  });
+  gsap.to(".hero-in", {
+    yPercent: -18,
+    opacity: 0,
+    ease: "none",
+    scrollTrigger: { trigger: ".hero", start: "top top", end: "70% top", scrub: true },
+  });
+
+  /* -- Section headings: line masks lift as the heading arrives. -- */
+  document.querySelectorAll(".sec-head h2").forEach((h2) => {
+    if (h2.querySelector(".ln")) return;
+    const text = h2.innerHTML;
+    h2.innerHTML = `<span class="ln"><span>${text}</span></span>`;
+    gsap.to(h2.querySelector(".ln > span"), {
+      y: "0%",
+      duration: 1,
+      ease: EASE,
+      scrollTrigger: { trigger: h2, start: "top 88%" },
+    });
+  });
+
+  /* -- THE STACK. Each panel scales back and dims, driven by the arrival of the
+        next panel, so one build hands off to the next. -- */
+  const panels = gsap.utils.toArray(".panel");
+  panels.forEach((panel, i) => {
+    const img = panel.querySelector(".slab-media img");
+
+    // Maximize: the incoming build settles from slightly over-scaled to rest.
+    gsap.fromTo(
+      img,
+      { scale: 1.22 },
+      {
+        scale: 1,
+        ease: "none",
+        scrollTrigger: { trigger: panel, start: "top bottom", end: "top top", scrub: true },
+      }
+    );
+
+    // Minimize: pushed back and dimmed as the next panel covers it.
+    if (i < panels.length - 1) {
+      gsap.to(panel, {
+        scale: 0.9,
+        opacity: 0.25,
+        ease: "none",
+        scrollTrigger: {
+          trigger: panels[i + 1],
+          start: "top bottom",
+          end: "top top",
+          scrub: true,
+        },
+      });
+    }
+  });
+
+  /* -- Stack counter. Feedback: tells you where you are in a ten-panel reel. -- */
+  const hud = document.getElementById("stackHud");
+  if (hud && panels.length) {
+    const cur = hud.querySelector(".cur");
+    const bar = hud.querySelector(".stack-bar i");
+    hud.querySelector(".tot").textContent = `/ ${String(panels.length).padStart(2, "0")}`;
+
+    ScrollTrigger.create({
+      trigger: "#work",
+      start: "top top",
+      end: "bottom bottom",
+      onToggle: (self) => hud.classList.toggle("on", self.isActive),
+      onUpdate: (self) => {
+        const n = Math.min(panels.length, Math.floor(self.progress * panels.length) + 1);
+        cur.textContent = String(n).padStart(2, "0");
+        bar.style.width = `${self.progress * 100}%`;
+      },
+    });
+  }
+
+  /* -- Craft bento: cells lift in sequence so the grid assembles itself. -- */
+  gsap.from(".bento .cell", {
+    y: 46,
+    opacity: 0,
+    duration: 0.9,
+    ease: EASE,
+    stagger: 0.07,
+    scrollTrigger: { trigger: ".bento", start: "top 82%" },
+  });
+  const bentoImg = document.querySelector(".cell.tall .cell-img img");
+  if (bentoImg) {
+    gsap.fromTo(
+      bentoImg,
+      { scale: 1.3 },
+      { scale: 1, ease: "none", scrollTrigger: { trigger: ".bento", start: "top bottom", end: "bottom top", scrub: true } }
+    );
+  }
+
+  /* -- Marquee skew. Feedback: the row leans into the direction you are
+        scrolling, then settles. Cheap, and it makes the section feel alive. -- */
+  const track = document.getElementById("voicesMount");
+  if (track) {
+    const setSkew = gsap.quickTo(track, "skewX", { duration: 0.5, ease: "power3" });
+    const setScale = gsap.quickTo(track, "scaleY", { duration: 0.5, ease: "power3" });
+    ScrollTrigger.create({
+      trigger: ".voices",
+      start: "top bottom",
+      end: "bottom top",
+      onUpdate: (self) => {
+        const v = gsap.utils.clamp(-9, 9, self.getVelocity() / 260);
+        setSkew(v);
+        setScale(1 + Math.abs(v) / 220);
+      },
+    });
+  }
+
+  /* -- Scope rows and tool pills. -- */
+  gsap.from(".scope-row", {
+    y: 24, opacity: 0, duration: 0.7, ease: EASE, stagger: 0.08,
+    scrollTrigger: { trigger: ".scope", start: "top 86%" },
+  });
+  gsap.from(".tool", {
+    y: 16, opacity: 0, duration: 0.6, ease: EASE, stagger: 0.05,
+    scrollTrigger: { trigger: ".tools", start: "top 90%" },
+  });
+  gsap.from("#discordMount .dc", {
+    y: 40, opacity: 0, duration: 1, ease: EASE,
+    scrollTrigger: { trigger: "#start", start: "top 72%" },
+  });
+
+  // Images finish loading after ScrollTrigger measures, which shifts every
+  // start/end. Recalculate once everything has settled.
+  window.addEventListener("load", () => ScrollTrigger.refresh());
+}
 /* ============================== INIT ============================== */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -882,4 +1030,5 @@ document.addEventListener("DOMContentLoaded", () => {
   setupCountUp();
   setupKeys();
   setupDiscordCard();
+  setupMotion();
 });
