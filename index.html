@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#08070a" />
+  <meta name="theme-color" content="#08080a" />
   <meta name="color-scheme" content="dark" />
   <meta name="description" content="Roblox map builder and environment designer. 5+ years building interiors, terrain, and full environments for games with 400M+ combined visits." />
   <meta name="keywords" content="fear, f34r, Roblox builder, Roblox developer, portfolio, environment design, map building, terrain" />
@@ -33,12 +33,19 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preload" as="image" href="img/astral-lounge/1.webp" fetchpriority="high" />
+  <link rel="preload" as="image" href="img/enchanted/2.webp" fetchpriority="high" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
 <div class="grain"></div>
+
+<!-- INTRO CURTAIN: removed by script.js after one run, or immediately under reduced motion -->
+<div class="boot" id="boot" aria-hidden="true">
+  <span class="boot-n" id="bootN">0<i>0</i></span>
+  <span class="boot-l">Builds shipped</span>
+  <span class="boot-bar" id="bootBar"></span>
+</div>
 
 <!-- NAV -->
 <nav class="nav" id="nav">
@@ -65,16 +72,16 @@
 <!-- HERO -->
 <header class="hero" id="top">
   <div class="hero-media">
-    <img src="img/astral-lounge/1.webp" alt="Art deco lounge interior built in Roblox Studio" width="1600" height="805" fetchpriority="high" />
+    <img src="img/enchanted/2.webp" alt="Stylized enchanted grove with magenta canopies and lantern-lit path, built in Roblox Studio" width="1920" height="956" fetchpriority="high" />
   </div>
   <div class="hero-in">
-    <h1 id="heroH1"><span class="ln"><span>Worlds that hold up</span></span><span class="ln"><span>at 400 million visits.</span></span></h1>
-    <p class="hero-sub">I build interiors, terrain, and full environments for Roblox games. Detailed enough to sell the world, light enough to run on a phone.</p>
+    <h1 id="heroH1"><span class="ln"><span>Worlds that hold up</span></span><span class="ln"><span>at <em>400 million</em> visits.</span></span></h1>
+    <p class="hero-sub">Interiors, terrain, and full environments for Roblox games. Detailed enough to sell the world, light enough to run on a phone.</p>
     <div class="hero-ctas">
-      <a href="#work" class="btn btn-solid">See the work
+      <a href="#work" class="btn btn-accent" data-magnetic>See the work
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
       </a>
-      <a href="#start" class="btn btn-line">Start a project</a>
+      <a href="#start" class="btn btn-line" data-magnetic>Start a project</a>
     </div>
     <div class="hero-figures rv">
       <div><span class="fig-n" data-to="5" data-suffix="+">0</span><span class="fig-l">Years building</span></div>
@@ -90,21 +97,33 @@
   <div class="wrap">
     <div class="sec-head rv">
       <span class="mono">Selected work</span>
-      <h2 style="margin-top:14px">Ten builds, start to finish.</h2>
-      <p>Every one of these shipped into a live game. Open any project for the full set of shots.</p>
+      <h2 style="margin-top:14px">Six builds, <em>start to finish</em>.</h2>
+      <p>Every one shipped into a live game. Open any project for the full set of shots.</p>
+      <div class="rule"></div>
     </div>
   </div>
   <div class="stack" id="workMount"></div>
   <div class="stack-hud" id="stackHud" aria-hidden="true">
-    <span class="cur">01</span><span class="tot">/ 10</span>
+    <span class="cur">01</span><span class="tot">/ 06</span>
     <span class="stack-bar"><i></i></span>
+  </div>
+</section>
+
+<!-- INDEX: horizontal pan -->
+<section class="pan" id="index" aria-label="More builds">
+  <div class="pan-track" id="indexMount">
+    <div class="pan-intro">
+      <h2>The rest of <em style="font-style:normal;color:var(--accent)">the shelf</em>.</h2>
+      <p>Lobbies, terrain, interiors, and prop sets from the last three years.</p>
+      <div class="rule"></div>
+    </div>
   </div>
 </section>
 
 <!-- CRAFT -->
 <section class="sec" id="craft" style="padding-top:0">
   <div class="wrap">
-    <div class="sec-head rv"><h2>How I build.</h2></div>
+    <div class="sec-head rv"><h2>How I <em>build</em>.</h2><div class="rule"></div></div>
     <div class="bento" id="craftMount"></div>
   </div>
 </section>
@@ -113,7 +132,7 @@
 <!-- CLIENTS -->
 <section class="sec voices" id="clients">
   <div class="wrap">
-    <div class="sec-head rv" style="margin-bottom:38px"><h2>What clients say.</h2></div>
+    <div class="sec-head rv" style="margin-bottom:38px"><h2>What clients <em>say</em>.</h2></div>
   </div>
   <div class="mq"><div class="mq-track" id="voicesMount"></div></div>
   <div class="wrap" style="margin-top:clamp(64px,9vh,110px)">
@@ -126,7 +145,7 @@
 <section class="sec" id="start">
   <div class="wrap start start-grid">
     <div class="rv">
-      <h2>Have a map in mind?</h2>
+      <h2>Have a map <em>in mind</em>?</h2>
       <p class="start-lede">Tell me the game, the scope, and roughly what you are working with. I will come back with a plan, a timeline, and a quote.</p>
       <div class="scope" id="scopeMount"></div>
       <p class="avail"><span class="dot"></span> Available for commissions</p>

@@ -2,6 +2,22 @@
 
 const PROJECTS = [
   {
+    name: "Enchanted Grove",
+    tags: ["Stylized", "Terrain", "Lighting"],
+    year: "2026",
+    role: "Full environment, foliage, lighting",
+    desc: "A stylized night grove built around colour. Hand-placed magenta and violet canopies break to gold at the centre of the path, lantern posts carry the eye down the trail, and emissive flower clusters pick out the verges. Every tree is a low-poly card set, so the whole biome holds frame rate on mobile.",
+    folder: "img/enchanted", count: 5,
+  },
+  {
+    name: "Wizard Tower",
+    tags: ["Fantasy", "Interior", "High-Poly"],
+    year: "2026",
+    role: "Interior build, lighting, set dressing",
+    desc: "The inside of a hollowed tower grown around a living tree. Rope-bound trunk through the centre, stacked timber galleries, banners, a spiral stair cut into the stone, and a fireplace throwing the warm key light that ties the whole room together.",
+    folder: "img/wizard-tower", count: 11,
+  },
+  {
     name: "Astral Art Deco Lounge",
     tags: ["Art Deco", "Interior", "High-Poly"],
     year: "2025",
@@ -289,11 +305,12 @@ function setupNav() {
    dims it while the next rises over it, so the set reads as one continuous reel
    instead of a wall of thumbnails. */
 
+const FEATURED_COUNT = 6;
+
 function renderWork() {
   const mount = document.getElementById("workMount");
-  const total = String(PROJECTS.length).padStart(2, "0");
 
-  PROJECTS.forEach((p, i) => {
+  PROJECTS.slice(0, FEATURED_COUNT).forEach((p, i) => {
     mount.appendChild(
       el(`
       <div class="panel" data-panel="${i}">
@@ -301,8 +318,7 @@ function renderWork() {
           <div class="slab-media">
             <img src="${p.images[0]}" alt="${esc(p.name)}" loading="${i < 2 ? "eager" : "lazy"}" width="1600" height="800" />
           </div>
-          <span class="slab-num">${String(i + 1).padStart(2, "0")} / ${total}</span>
-          <span class="slab-shots">${p.count} shots</span>
+          <span class="slab-glow" aria-hidden="true"></span>
           <div class="slab-cap">
             <div>
               <span class="mono">${esc(p.year)} &nbsp;/&nbsp; ${esc(p.role)}</span>
@@ -320,6 +336,40 @@ function renderWork() {
   mount.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-i]");
     if (btn) openProject(Number(btn.dataset.i));
+  });
+}
+
+/* ============================== INDEX: HORIZONTAL PAN ==============================
+   The remaining builds. A different layout family from the stack, and it shows
+   the breadth of the back catalogue in one screen instead of six more. */
+
+function renderIndex() {
+  const mount = document.getElementById("indexMount");
+  if (!mount) return;
+
+  PROJECTS.slice(FEATURED_COUNT).forEach((p, n) => {
+    const i = n + FEATURED_COUNT;
+    mount.appendChild(
+      el(`
+      <article class="card" data-card="${i}">
+        <div class="card-media">
+          <img src="${p.images[0]}" alt="${esc(p.name)}" loading="lazy" width="960" height="640" />
+        </div>
+        <span class="card-go" aria-hidden="true">${I_ARROW}</span>
+        <div class="card-cap">
+          <span class="mono">${esc(p.year)}</span>
+          <h3>${esc(p.name)}</h3>
+          ${tagsHTML(p.tags)}
+        </div>
+        <button class="sr" type="button" data-i="${i}">Open project: ${esc(p.name)}</button>
+      </article>
+    `)
+    );
+  });
+
+  mount.addEventListener("click", (e) => {
+    const card = e.target.closest("[data-card]");
+    if (card) openProject(Number(card.dataset.card));
   });
 }
 
@@ -353,7 +403,7 @@ function renderCraft() {
     } else {
       mount.appendChild(
         el(`
-        <div class="cell ${c.kind === "accent" ? "span4 accent" : "span2"} rv">
+        <div class="cell ${c.kind === "accent" ? "span6 accent" : "span2"} rv">
           <h3>${esc(c.title)}</h3>
           <p>${esc(c.body)}</p>
         </div>
@@ -858,14 +908,116 @@ function setupDiscordCard() {
    having loaded. If the CDN is blocked the page still renders and works,
    it just sits still. */
 
+/* ============================== INTRO CURTAIN ==============================
+   Storytelling: the headline number lands before the first build does, so the
+   page opens on the claim rather than on a nav bar. Runs once per session, is
+   under a second, and never depends on GSAP loading. */
+
+function setupBoot() {
+  const boot = document.getElementById("boot");
+  if (!boot) return;
+
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let seen = false;
+  try { seen = sessionStorage.getItem("booted") === "1"; } catch (e) { /* private mode */ }
+
+  const drop = () => { boot.remove(); document.documentElement.classList.remove("no-scroll"); };
+  if (reduce || seen) { drop(); return; }
+
+  try { sessionStorage.setItem("booted", "1"); } catch (e) { /* ignore */ }
+
+  const n = document.getElementById("bootN");
+  const bar = document.getElementById("bootBar");
+  const TO = 50;
+  const DUR = 820;
+  document.documentElement.classList.add("no-scroll");
+
+  // Safety net: if rAF never ticks (a background tab, a throttled renderer)
+  // the curtain must not be what stands between a visitor and the site.
+  const bail = setTimeout(drop, 2600);
+
+  const t0 = performance.now();
+  const tick = (now) => {
+    const p = Math.min(1, (now - t0) / DUR);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const v = String(Math.round(TO * eased)).padStart(2, "0");
+    n.innerHTML = `${v[0]}<i>${v[1]}</i>`;
+    bar.style.width = `${p * 100}%`;
+    if (p < 1) { requestAnimationFrame(tick); return; }
+    clearTimeout(bail);
+    // Curtain lifts off the top of the hero rather than fading, so the first
+    // build is revealed rather than cross-dissolved into.
+    boot.style.transition = "transform .75s cubic-bezier(.76,0,.24,1)";
+    boot.style.transform = "translateY(-101%)";
+    document.documentElement.classList.remove("no-scroll");
+    setTimeout(drop, 800);
+  };
+  requestAnimationFrame(tick);
+}
+
+/* ============================== POINTER PHYSICS ==============================
+   Feedback only, and only where a click is the point: the two hero CTAs and the
+   contact button pull toward the cursor, cards light up under it. Transform and
+   a CSS custom property, both off the React-less render path, both rAF-gated. */
+
+function setupPointer() {
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce || !window.matchMedia("(pointer: fine)").matches) return;
+
+  // Magnetic buttons
+  document.querySelectorAll("[data-magnetic]").forEach((btn) => {
+    let raf = 0;
+    const move = (e) => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const r = btn.getBoundingClientRect();
+        const dx = (e.clientX - (r.left + r.width / 2)) * 0.28;
+        const dy = (e.clientY - (r.top + r.height / 2)) * 0.34;
+        btn.style.transform = `translate(${dx}px, ${dy}px)`;
+      });
+    };
+    const reset = () => {
+      if (raf) { cancelAnimationFrame(raf); raf = 0; }
+      btn.style.transition = "transform .5s cubic-bezier(.22,1,.36,1)";
+      btn.style.transform = "";
+      setTimeout(() => (btn.style.transition = ""), 500);
+    };
+    btn.addEventListener("pointermove", move);
+    btn.addEventListener("pointerleave", reset);
+  });
+
+  // Cursor spotlight on the featured slabs
+  document.querySelectorAll(".slab").forEach((slab) => {
+    let raf = 0;
+    slab.addEventListener("pointermove", (e) => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const r = slab.getBoundingClientRect();
+        slab.style.setProperty("--mx", `${((e.clientX - r.left) / r.width) * 100}%`);
+        slab.style.setProperty("--my", `${((e.clientY - r.top) / r.height) * 100}%`);
+      });
+    });
+  });
+}
+
 function setupMotion() {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const hasGSAP = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
 
   if (reduce || !hasGSAP) {
-    // Static fallback: put the masked headline lines back where they belong.
+    // Static fallback: put the masked headline lines back where they belong,
+    // draw the rules in place, and make the pan row reachable by hand, since
+    // nothing is going to scrub it sideways.
     document.querySelectorAll(".ln > span").forEach((s) => (s.style.transform = "none"));
-    document.querySelectorAll(".wipe").forEach((n) => n.classList.remove("wipe"));
+    document.querySelectorAll(".rule").forEach((r) => (r.style.transform = "none"));
+    const panEl = document.querySelector(".pan");
+    if (panEl) {
+      panEl.style.overflowX = "auto";
+      panEl.style.scrollSnapType = "x proximity";
+      document.querySelectorAll(".card").forEach((c) => (c.style.scrollSnapAlign = "center"));
+    }
     return;
   }
 
@@ -1011,6 +1163,58 @@ function setupMotion() {
     scrollTrigger: { trigger: "#start", start: "top 72%" },
   });
 
+  /* -- Accent rules draw themselves across as each section header lands.
+        Hierarchy: it marks where a new part of the page begins. -- */
+  gsap.utils.toArray(".rule").forEach((r) => {
+    gsap.to(r, {
+      scaleX: 1,
+      duration: 1.1,
+      ease: "power4.out",
+      scrollTrigger: { trigger: r, start: "top 92%" },
+    });
+  });
+
+  /* -- THE INDEX PAN. Vertical scroll drives the track sideways. Storytelling:
+        after six full-screen builds, the back catalogue reads as one sweep
+        rather than six more screens of scrolling. -- */
+  const pan = document.querySelector(".pan");
+  const panTrack = document.getElementById("indexMount");
+  if (pan && panTrack) {
+    const distance = () => Math.max(0, panTrack.scrollWidth - window.innerWidth);
+    gsap.to(panTrack, {
+      x: () => -distance(),
+      ease: "none",
+      scrollTrigger: {
+        trigger: pan,
+        start: "top top",
+        end: () => `+=${distance()}`,
+        pin: true,
+        scrub: 1,
+        invalidateOnRefresh: true,
+      },
+    });
+
+    // Each card's image drifts against the track, so the row has depth instead
+    // of sliding as one flat plane.
+    gsap.utils.toArray(".card-media img").forEach((img) => {
+      gsap.fromTo(
+        img,
+        { yPercent: -6 },
+        {
+          yPercent: 0,
+          ease: "none",
+          scrollTrigger: {
+            trigger: pan,
+            start: "top top",
+            end: () => `+=${distance()}`,
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        }
+      );
+    });
+  }
+
   // Images finish loading after ScrollTrigger measures, which shifts every
   // start/end. Recalculate once everything has settled.
   window.addEventListener("load", () => ScrollTrigger.refresh());
@@ -1018,7 +1222,9 @@ function setupMotion() {
 /* ============================== INIT ============================== */
 
 document.addEventListener("DOMContentLoaded", () => {
+  setupBoot();
   renderWork();
+  renderIndex();
   renderCraft();
   renderReviews();
   renderTools();
@@ -1031,4 +1237,5 @@ document.addEventListener("DOMContentLoaded", () => {
   setupKeys();
   setupDiscordCard();
   setupMotion();
+  setupPointer();
 });
