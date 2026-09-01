@@ -1,816 +1,596 @@
 /* ============================== DATA ============================== */
 
 const PROJECTS = [
-  { name: "Astral — Art Deco Lounge", tags: ["Art Deco", "Interior", "High-Poly"], desc: "A retro-futurist lounge and bar deck built around glowing amber column lights. Gold trim, tufted velvet booths, checkered flooring, and layered planters against a wall of night-lit viewing windows.", folder: "img/astral-lounge", count: 5 },
-  { name: "Astral — Observation Promenade", tags: ["Art Deco", "Interior", "Atmospheric"], desc: "The daylit promenade deck of the same vessel — sweeping curved staircases, red leather banquettes, and floor-to-ceiling glass opening onto open sky.", folder: "img/astral-promenade", count: 4 },
-  { name: "Igris Room", tags: ["Anime", "Interior", "Detailed"], desc: "An anime-inspired interior built around a single striking centerpiece, with lighting and props tuned to sell the mood of the room.", folder: "img/igris", count: 5 },
-  { name: "Medieval Castle", tags: ["Medieval", "High-Poly", "Exterior"], desc: "A full-scale medieval castle exterior — high-poly stonework, towers, and grounds built for an immersive roleplay map.", folder: "img/castle", count: 8 },
-  { name: "Office", tags: ["RPG", "Interior", "Multi-room"], desc: "A multi-room interior built for a medieval RPG map, balancing detail with clean, readable navigation for players.", folder: "img/rpg", count: 6 },
-  { name: "Pumpkin Grave", tags: ["Halloween", "Atmosphere", "Terrain"], desc: "A moody Halloween-themed graveyard scene, leaning on terrain sculpting and lighting to build atmosphere.", folder: "img/grave", count: 5 },
-  { name: "Studs Lobby", tags: ["Lobby", "Stylized", "Clean"], desc: "A clean, stylized lobby space designed to load fast and give players a strong first impression.", folder: "img/Studs", count: 5 },
-  { name: "Dark Cathedral", tags: ["Gothic", "High-Poly", "Atmosphere"], desc: "A gothic cathedral interior with high-poly detailing, built to feel imposing and atmospheric.", folder: "img/cathedral", count: 7 },
-  { name: "Ruined House", tags: ["Cartoon", "Low-Poly", "Ruins"], desc: "A cartoon-style ruined house, kept intentionally low-poly to fit a stylized, lightweight game world.", folder: "img/cartoon", count: 3 },
-  { name: "Cricket Lobby", tags: ["Sports", "Lobby", "Ranked"], desc: "A ranked sports lobby built for a cricket game, designed around clarity and quick matchmaking flow.", folder: "img/ranked", count: 7 },
+  {
+    name: "Astral Art Deco Lounge",
+    tags: ["Art Deco", "Interior", "High-Poly"],
+    year: "2025",
+    role: "Interior build, lighting, props",
+    desc: "A retro-futurist lounge and bar deck built around glowing amber column lights. Gold trim, tufted velvet booths, checkered flooring, and layered planters set against a wall of night-lit viewing windows.",
+    folder: "img/astral-lounge", count: 5,
+  },
+  {
+    name: "Astral Observation Promenade",
+    tags: ["Art Deco", "Interior", "Atmospheric"],
+    year: "2025",
+    role: "Interior build, lighting",
+    desc: "The daylit promenade deck of the same vessel. Sweeping curved staircases, red leather banquettes, and floor-to-ceiling glass opening onto open sky.",
+    folder: "img/astral-promenade", count: 4,
+  },
+  {
+    name: "Medieval Castle",
+    tags: ["Medieval", "High-Poly", "Exterior"],
+    year: "2024",
+    role: "Full exterior, terrain, props",
+    desc: "A full-scale medieval castle exterior. High-poly stonework, towers, and grounds built for an immersive roleplay map.",
+    folder: "img/castle", count: 8,
+  },
+  {
+    name: "Dark Cathedral",
+    tags: ["Gothic", "High-Poly", "Atmosphere"],
+    year: "2024",
+    role: "Interior build, lighting",
+    desc: "A gothic cathedral interior with high-poly detailing, built to feel imposing and atmospheric without tanking frame rate.",
+    folder: "img/cathedral", count: 7,
+  },
+  {
+    name: "Igris Room",
+    tags: ["Anime", "Interior", "Detailed"],
+    year: "2024",
+    role: "Interior build, set dressing",
+    desc: "An anime-inspired interior built around a single striking centerpiece, with lighting and props tuned to sell the mood of the room.",
+    folder: "img/igris", count: 5,
+  },
+  {
+    name: "Cricket Lobby",
+    tags: ["Sports", "Lobby", "Ranked"],
+    year: "2025",
+    role: "Lobby build, UI staging",
+    desc: "A ranked sports lobby built for a cricket game, designed around clarity and a quick matchmaking flow.",
+    folder: "img/ranked", count: 7,
+  },
+  {
+    name: "RPG Office",
+    tags: ["RPG", "Interior", "Multi-room"],
+    year: "2024",
+    role: "Multi-room interior",
+    desc: "A multi-room interior built for a medieval RPG map, balancing detail against clean, readable navigation for players.",
+    folder: "img/rpg", count: 6,
+  },
+  {
+    name: "Pumpkin Grave",
+    tags: ["Halloween", "Terrain", "Atmosphere"],
+    year: "2023",
+    role: "Terrain sculpting, lighting",
+    desc: "A moody Halloween graveyard scene leaning on terrain sculpting and lighting to build atmosphere.",
+    folder: "img/grave", count: 5,
+  },
+  {
+    name: "Studs Lobby",
+    tags: ["Lobby", "Stylized", "Clean"],
+    year: "2024",
+    role: "Lobby build",
+    desc: "A clean, stylized lobby space designed to load fast and give players a strong first impression.",
+    folder: "img/Studs", count: 5,
+  },
+  {
+    name: "Ruined House",
+    tags: ["Cartoon", "Low-Poly", "Ruins"],
+    year: "2023",
+    role: "Prop set, low-poly build",
+    desc: "A cartoon-style ruined house, kept intentionally low-poly to fit a stylized, lightweight game world.",
+    folder: "img/cartoon", count: 3,
+  },
 ].map((p) => ({ ...p, images: Array.from({ length: p.count }, (_, i) => `${p.folder}/${i + 1}.webp`) }));
 
-const PRICING = [
+const CRAFT = [
   {
-    tier: "Small Projects", price: "$50 – 350", turnaround: "2–5 day turnaround",
-    desc: "Small maps, single interiors, props, or compact spawn areas. Fast turnaround, optimized low-poly work.",
-    features: ["Fast turnaround (2–5 days)", "Clean, low-poly style for smooth performance", "Perfect for spawns, lobbies, or small showcases"],
-    featured: false,
-    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>'
+    kind: "figure", n: "60", suffix: " FPS",
+    title: "Optimized as it is built",
+    body: "Part counts, unions, and texture budgets get watched from the first block. Detail that costs frames is detail that gets cut.",
   },
   {
-    tier: "Medium Projects", price: "$450 – 1,000", turnaround: "1–2 week turnaround",
-    desc: "Full small-to-medium maps (~1k–4k studs), detailed areas, multi-room interiors, or a complete tycoon plot.",
-    features: ["Includes custom props & decor", "Balanced detail and optimization for gameplay", "Multiple revisions for a perfect delivery"],
-    featured: true,
-    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>'
+    kind: "image", img: "img/igris/1.webp",
+    title: "Any art style you need",
+    body: "Anime, low-poly, cartoony, gritty high-poly realism. The style follows your game, not my habits.",
   },
   {
-    tier: "Large Projects", price: "$1,500 – 5,000", turnaround: "3–5 week turnaround",
-    desc: "Big maps (~4k–8k studs), multi-biome builds, large mansions, or projects needing many custom assets.",
-    features: ["Multi-biome environments or huge city maps", "Custom terrain and detailed assets included", "High-quality custom 3D models"],
-    featured: false,
-    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7Z"/><path d="M5 19h14"/></svg>'
+    kind: "plain",
+    title: "Terrain and interiors, not just props",
+    body: "Sculpted landscapes, multi-room interiors, and full maps. Whole environments rather than a folder of models.",
+  },
+  {
+    kind: "plain",
+    title: "Revisions until it is right",
+    body: "Work in progress goes to you throughout, not just at the end. Changes are expected, not charged as surprises.",
+  },
+  {
+    kind: "accent",
+    title: "Delivered on the date agreed",
+    body: "Timelines are set before the first block is placed, and I hold to them. Eight of eight reviewers mention delivery.",
   },
 ];
 
 const REVIEWS = [
-  { name: "Halo", quote: "The map was good!", rating: 5, avatar: "img/halo.webp" },
-  { name: "Havik", quote: "f34r is a cool dude and I've worked with him a lot.", rating: 5, avatar: "img/havik.webp" },
-  { name: "Kolfou", quote: "The buildings were amazing — delivery, service, and quality were all 10/10.", rating: 5, avatar: "img/kolfou.webp" },
-  { name: "Patty", quote: "10/10, the builds were high quality. I'd recommend him to anybody looking for a builder.", rating: 5, avatar: "img/patty.webp" },
-  { name: "Jay", quote: "Thanks, pleasure doing business with you.", rating: 5, avatar: "img/J.webp" },
-  { name: "Aser", quote: "The map and models were perfect for the Christmas update, delivered right on time.", rating: 5, avatar: "img/aser.webp" },
-  { name: "ycbabyy", quote: "Thanks so much for the work — looking forward to hiring you again!", rating: 5, avatar: "img/ycbabyy.webp" },
-  { name: "Ghostnob", quote: "Good builder, pretty fast, and reviewed the map again after I asked for it.", rating: 4, avatar: "img/ghost.webp" },
+  { name: "Halo", role: "Game developer", quote: "The map was good.", rating: 5, avatar: "img/halo.webp" },
+  { name: "Havik", role: "Studio owner", quote: "f34r is a cool dude and I have worked with him a lot.", rating: 5, avatar: "img/havik.webp" },
+  { name: "Kolfou", role: "Game developer", quote: "The buildings were amazing. Delivery, service, and quality were all 10/10.", rating: 5, avatar: "img/kolfou.webp" },
+  { name: "Patty", role: "Studio owner", quote: "10/10, the builds were high quality. I would recommend him to anybody looking for a builder.", rating: 5, avatar: "img/patty.webp" },
+  { name: "Jay", role: "Commissioner", quote: "Thanks, pleasure doing business with you.", rating: 5, avatar: "img/J.webp" },
+  { name: "Aser", role: "Game developer", quote: "The map and models were perfect for the Christmas update, delivered right on time.", rating: 5, avatar: "img/aser.webp" },
+  { name: "ycbabyy", role: "Commissioner", quote: "Thanks so much for the work, looking forward to hiring you again.", rating: 5, avatar: "img/ycbabyy.webp" },
+  { name: "Ghostnob", role: "Game developer", quote: "Good builder, pretty fast, and reviewed the map again after I asked for it.", rating: 4, avatar: "img/ghost.webp" },
 ];
 
 const TOOLS = [
-  { label: "Roblox Studio", type: "img", src: "https://cdn.simpleicons.org/roblox?viewbox=auto" },
-  { label: "Lua / Luau", type: "img", src: "https://cdn.simpleicons.org/lua?viewbox=auto" },
-  { label: "Photoshop", type: "img", src: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/photoshop/photoshop-plain.svg" },
-  { label: "Substance Painter", type: "custom", svg: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1.3" fill="currentColor" stroke="none"/><circle cx="14" cy="9" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="1.3" fill="currentColor" stroke="none"/><circle cx="10" cy="15" r="1" fill="currentColor" stroke="none"/><path d="M12 3a9 9 0 0 0 0 18c1.4 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H16a4 4 0 0 0 4-4c0-4.4-3.6-8-8-8Z"/></svg>' },
-  { label: "Discord", type: "img", src: "https://cdn.simpleicons.org/discord?viewbox=auto" },
-  { label: "Blender", type: "img", src: "https://cdn.simpleicons.org/blender?viewbox=auto" },
+  { label: "Roblox Studio", src: "https://cdn.simpleicons.org/roblox/9d98a6" },
+  { label: "Blender", src: "https://cdn.simpleicons.org/blender/9d98a6" },
+  { label: "Substance Painter", src: "https://cdn.simpleicons.org/adobe/9d98a6" },
+  { label: "Photoshop", src: "https://cdn.simpleicons.org/adobephotoshop/9d98a6" },
+  { label: "Luau", src: "https://cdn.simpleicons.org/lua/9d98a6" },
+  { label: "Discord", src: "https://cdn.simpleicons.org/discord/9d98a6" },
+];
+
+const SCOPE = [
+  { label: "Props and small sets", detail: "A spawn, a shopfront, a prop pack. Days, not weeks." },
+  { label: "Single environments", detail: "One finished interior, lobby, or arena, fully dressed and lit." },
+  { label: "Full maps", detail: "Multi-biome worlds, custom terrain, and the asset library to fill them." },
 ];
 
 const DISCORD_USER_ID = "1088022144308486176";
+const DISCORD_URL = "https://discord.com/users/1088022144308486176";
 
 // Discord Nitro and Server Boosting status are NEVER exposed to bots for other
-// users (a platform-level privacy restriction, not a Lanyard limitation) — so
-// these can't be fetched live. Set them by hand to match your real profile.
+// users (a platform-level privacy restriction, not a Lanyard limitation), so
+// these are set by hand to match the real profile.
 //
 //   nitroTier: false, or one of "bronze" "silver" "gold" "platinum"
-//              "diamond" "emerald" "ruby" "opal"   (your Nitro subscription gem)
-//   boostTier: false, or 1-9 — how long you've boosted:
-//              1=1mo  2=2mo  3=3mo  4=6mo  5=9mo  6=12mo  7=15mo  8=18mo  9=24mo
+//              "diamond" "emerald" "ruby" "opal"
+//   boostTier: false, or 1-9 (1=1mo 2=2mo 3=3mo 4=6mo 5=9mo 6=12mo 7=15mo 8=18mo 9=24mo)
 const MY_BADGES = {
   nitroTier: "platinum",
   boostTier: 6,
 };
 
-/* ============================== ICONS (inline SVG strings) ============================== */
+/* ============================== ICONS ============================== */
 
-const ICON_EXT_LINK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg>';
-const ICON_STAR = (on) => `<svg width="13" height="13" viewBox="0 0 24 24" fill="${on ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
-const ICON_QUOTE = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 8C6.5 8 4 10.5 4 13.5S6.5 19 9.5 19c0-3 1-5.5 3-7v-1c0-1.5-1.2-3-3-3Zm9 0c-3 0-5.5 2.5-5.5 5.5S15.5 19 18.5 19c0-3 1-5.5 3-7v-1c0-1.5-1.2-3-3-3Z"/></svg>';
-const ICON_CHECK = '<svg class="check-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>';
-const ICON_CHEVRON_LEFT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg>';
-const ICON_CHEVRON_RIGHT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 18 6-6-6-6"/></svg>';
-const ICON_VERIFIED = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>';
-const ICON_STAR_SM = '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
-const ICON_EXPAND = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>';
-const ICON_CAMERA = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
-
-/* ============================== SMALL UTILS ============================== */
+const I_ARROW = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const I_CLOSE = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+const I_PREV  = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>';
+const I_NEXT  = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
+const I_STAR  = (on) => `<svg width="13" height="13" viewBox="0 0 24 24" fill="${on ? "currentColor" : "none"}" stroke="currentColor" stroke-width="1.6" opacity="${on ? 1 : 0.35}"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+const I_CHAT  = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+const I_CODE  = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>';
 
 function el(html) {
   const t = document.createElement("template");
   t.innerHTML = html.trim();
   return t.content.firstElementChild;
 }
-
-/* ============================== WAVE BACKGROUND ============================== */
-
-function buildWaveField() {
-  const g = document.getElementById("waveLines");
-  const count = 13;
-  for (let i = 0; i < count; i++) {
-    const base = 40 + i * 52;
-    const amp = 55 + (i % 4) * 24;
-    const freq = 0.0032 + (i % 3) * 0.0011;
-    const phase = i * 0.65;
-    const period = (2 * Math.PI) / freq;
-    let d = "";
-    for (let x = -200; x <= 1600; x += 20) {
-      const y = base + amp * Math.sin(x * freq + phase) + Math.sin(x * freq * 2.3 + phase) * (amp * 0.25);
-      d += (x === -200 ? "M" : "L") + x.toFixed(1) + "," + y.toFixed(1) + " ";
-    }
-    const bright = i > count * 0.35;
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", d);
-    path.setAttribute("fill", "none");
-    path.setAttribute("stroke", "url(#waveGrad)");
-    path.setAttribute("stroke-width", bright ? "1.6" : "1");
-    path.setAttribute("opacity", bright ? (0.28 + (i % 4) * 0.08) : (0.08 + (i % 3) * 0.04));
-    path.setAttribute("filter", "url(#waveBlur)");
-    path.style.setProperty("--shift", `${period}px`);
-    path.style.animation = `waveDrift ${26 + (i % 5) * 6}s linear infinite ${i % 2 === 0 ? "reverse" : "normal"}`;
-    g.appendChild(path);
-  }
-}
-
-function buildEmbers() {
-  const wrap = document.getElementById("embers");
-  for (let i = 0; i < 24; i++) {
-    const span = document.createElement("span");
-    span.className = "ember";
-    const size = 2 + Math.random() * 4;
-    span.style.left = `${Math.random() * 100}%`;
-    span.style.width = `${size}px`;
-    span.style.height = `${size}px`;
-    span.style.setProperty("--drift", `${(Math.random() - 0.5) * 60}px`);
-    span.style.animationDuration = `${11 + Math.random() * 16}s`;
-    span.style.animationDelay = `${-(Math.random() * 24)}s`;
-    wrap.appendChild(span);
-  }
-}
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const tagsHTML = (tags) => `<div class="tags">${tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>`;
 
 /* ============================== REVEAL ON SCROLL ============================== */
 
 function setupReveal() {
-  const items = document.querySelectorAll(".reveal:not(.in-view)");
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("in-view");
-        io.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.12 });
-  items.forEach((item) => io.observe(item));
+  const items = document.querySelectorAll(".rv");
+  if (!("IntersectionObserver" in window)) {
+    items.forEach((n) => n.classList.add("in"));
+    return;
+  }
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add("in");
+        io.unobserve(e.target);
+      });
+    },
+    { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+  );
+  items.forEach((n) => io.observe(n));
 }
 
 /* ============================== COUNT UP ============================== */
+/* Motivated: the three figures are the credibility claim. Counting draws the
+   eye to them once, on arrival, then stops. */
 
 function setupCountUp() {
-  const target = document.getElementById("countStat");
-  if (!target) return;
-  let started = false;
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting && !started) {
-        started = true;
-        const end = 400;
-        const duration = 1800;
-        const start = performance.now();
-        const tick = (now) => {
-          const progress = Math.min((now - start) / duration, 1);
-          const eased = 1 - Math.pow(1 - progress, 3);
-          target.textContent = `${Math.floor(eased * end)}M+`;
-          if (progress < 1) requestAnimationFrame(tick);
-          else target.textContent = `${end}M+`;
-        };
-        requestAnimationFrame(tick);
-        io.disconnect();
-      }
-    });
-  }, { threshold: 0.3 });
-  io.observe(target);
-}
+  const nums = document.querySelectorAll("[data-to]");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/* ============================== LOCAL CLOCK ============================== */
-
-function setupClock() {
-  const elTime = document.getElementById("localTime");
-  if (!elTime) return;
-  const tick = () => {
-    elTime.textContent = new Date().toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false });
-  };
-  tick();
-  setInterval(tick, 1000);
-}
-
-/* ============================== GLOBAL CURSOR GLOW (whole site) ============================== */
-
-function setupCursorGlow() {
-  const glow = document.getElementById("cursorGlow");
-  const dust = document.getElementById("cursorDust");
-  const target = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-  const current = { ...target };
-
-  const onMove = (e) => {
-    const p = e.touches ? e.touches[0] : e;
-    target.x = p.clientX;
-    target.y = p.clientY;
-  };
-  window.addEventListener("mousemove", onMove);
-  window.addEventListener("touchmove", onMove, { passive: true });
-
-  const loop = () => {
-    current.x += (target.x - current.x) * 0.08;
-    current.y += (target.y - current.y) * 0.08;
-    glow.style.transform = `translate(${current.x}px, ${current.y}px)`;
-    dust.style.transform = `translate(${current.x * 0.05}px, ${current.y * 0.05}px)`;
-    requestAnimationFrame(loop);
-  };
-  requestAnimationFrame(loop);
-}
-
-/* ============================== CUSTOM SMOOTH SCROLL ============================== */
-
-function setupSmoothScroll() {
-  let targetY = window.scrollY;
-  let currentY = window.scrollY;
-  let ticking = false;
-
-  const maxScroll = () => document.documentElement.scrollHeight - window.innerHeight;
-
-  const onWheel = (e) => {
-    const contactPage = document.getElementById("contactPage");
-    if (contactPage.style.display !== "none") return; // contact page is short, let it scroll natively
-    e.preventDefault();
-    targetY = Math.max(0, Math.min(targetY + e.deltaY, maxScroll()));
-    if (!ticking) {
-      ticking = true;
-      requestAnimationFrame(loop);
-    }
-  };
-
-  const loop = () => {
-    currentY += (targetY - currentY) * 0.14;
-    if (Math.abs(targetY - currentY) < 0.5) {
-      currentY = targetY;
-      window.scrollTo(0, currentY);
-      ticking = false;
+  const paint = (node) => {
+    const to = parseFloat(node.dataset.to);
+    const suffix = node.dataset.suffix || "";
+    if (reduce) {
+      node.textContent = to + suffix;
       return;
     }
-    window.scrollTo(0, currentY);
-    requestAnimationFrame(loop);
+    const dur = 1300;
+    const t0 = performance.now();
+    const step = (now) => {
+      const p = Math.min(1, (now - t0) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      node.textContent = Math.round(to * eased) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   };
 
-  window.addEventListener("wheel", onWheel, { passive: false });
-
-  window.addEventListener("scroll", () => {
-    if (!ticking) {
-      targetY = window.scrollY;
-      currentY = window.scrollY;
-    }
-  });
-
-  return {
-    animateTo(y) {
-      targetY = Math.max(0, Math.min(y, maxScroll()));
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(loop);
-      }
+  if (!("IntersectionObserver" in window)) {
+    nums.forEach(paint);
+    return;
+  }
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        paint(e.target);
+        io.unobserve(e.target);
+      });
     },
-  };
-}
-
-/* ============================== NAV / PAGE ROUTING ============================== */
-
-function setupNav(smoothScroll) {
-  const homePage = document.getElementById("homePage");
-  const contactPage = document.getElementById("contactPage");
-  const navLinks = document.querySelectorAll(".nav-link[data-goto]");
-  const navContact = document.querySelector(".nav-contact[data-goto]");
-  const mobileSheet = document.getElementById("mobileSheet");
-  const navToggle = document.getElementById("navToggle");
-
-  function setActive(id) {
-    navLinks.forEach((l) => l.classList.toggle("active", l.dataset.goto === id));
-    navContact.classList.toggle("active", id === "contact");
-  }
-
-  function goTo(id) {
-    mobileSheet.style.display = "none";
-    if (id === "contact") {
-      homePage.style.display = "none";
-      contactPage.style.display = "block";
-      window.scrollTo(0, 0);
-      setActive("contact");
-      return;
-    }
-    if (contactPage.style.display !== "none") {
-      contactPage.style.display = "none";
-      homePage.style.display = "block";
-    }
-    const target = document.getElementById(id);
-    if (target) smoothScroll.animateTo(target.getBoundingClientRect().top + window.scrollY - 10);
-    setActive(id);
-  }
-
-  document.querySelectorAll("[data-goto]").forEach((node) => {
-    node.addEventListener("click", (e) => {
-      e.preventDefault();
-      goTo(node.dataset.goto);
-    });
-  });
-
-  navToggle.addEventListener("click", () => {
-    mobileSheet.style.display = mobileSheet.style.display === "none" ? "flex" : "none";
-  });
-
-  // scrollspy for home/projects
-  const sections = ["home", "projects"].map((id) => document.getElementById(id)).filter(Boolean);
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting && contactPage.style.display === "none") setActive(entry.target.id);
-    });
-  }, { rootMargin: "-45% 0px -50% 0px" });
-  sections.forEach((s) => io.observe(s));
-}
-
-/* ============================== PROJECTS ============================== */
-
-function renderProjects() {
-  const grid = document.getElementById("projectGrid");
-  const viewAllWrap = document.getElementById("viewAllWrap");
-  const viewAllBtn = document.getElementById("viewAllBtn");
-  let showAll = false;
-
-  function render() {
-    grid.innerHTML = "";
-    // 1 featured (full width) + 4 regular = two complete rows, no empty cell
-    const list = showAll ? PROJECTS : PROJECTS.slice(0, 5);
-    list.forEach((p, i) => {
-      const isFeatured = i === 0;
-      // regular cards sit in a 2-col grid; if there's an odd number of them the
-      // last one would sit alone, so give it the wide layout instead of a gap
-      const isTrailingWide = !isFeatured && i === list.length - 1 && (list.length - 1) % 2 === 1;
-      const wide = isFeatured || isTrailingWide;
-      const card = el(`
-        <div class="project-card reveal${isFeatured ? " featured-project" : ""}${isTrailingWide ? " wide-project" : ""}" style="transition-delay:${(i % 4) * 90}ms" data-project="${i}">
-          <div class="project-inner">
-            <div class="project-media" data-index="0">
-              <div class="media-stage">
-                <img class="media-img active" src="${p.images[0]}" alt="${p.name}" loading="${isFeatured ? "eager" : "lazy"}" decoding="async" />
-                <img class="media-img" alt="" aria-hidden="true" decoding="async" />
-              </div>
-              <span class="project-index">${String(i + 1).padStart(2, "0")}</span>
-              <div class="project-title-row">
-                <h3>${p.name}</h3>
-                <div class="ext-ic">${ICON_EXT_LINK}</div>
-              </div>
-              <div class="project-hover-hint">
-                <span class="hint-pill">${ICON_EXPAND} View gallery</span>
-              </div>
-              ${p.images.length > 1 ? `
-                <span class="photo-count">${ICON_CAMERA} ${p.images.length}</span>
-                <button class="carousel-btn left" aria-label="Previous image">${ICON_CHEVRON_LEFT}</button>
-                <button class="carousel-btn right" aria-label="Next image">${ICON_CHEVRON_RIGHT}</button>
-                <div class="carousel-dots">
-                  ${p.images.map((_, di) => `<span class="dot ${di === 0 ? "active" : ""}"></span>`).join("")}
-                </div>
-              ` : ""}
-            </div>
-            <div class="project-body">
-              ${isFeatured ? `
-                <span class="featured-label">${ICON_STAR_SM} Featured Build</span>
-                <h3 class="featured-title">${p.name}</h3>
-              ` : isTrailingWide ? `
-                <h3 class="featured-title">${p.name}</h3>
-              ` : ""}
-              <p>${p.desc}</p>
-              ${wide ? `
-                <div class="featured-stats">
-                  <div><span class="fstat-num">${p.images.length}</span><span class="fstat-label">Angles</span></div>
-                  <div><span class="fstat-num">${p.tags[0]}</span><span class="fstat-label">Style</span></div>
-                  <div><span class="fstat-num">${p.tags[1]}</span><span class="fstat-label">Type</span></div>
-                </div>
-              ` : ""}
-              <div class="tag-row">${p.tags.map((t) => `<span class="tag">${t}</span>`).join("")}</div>
-            </div>
-          </div>
-        </div>
-      `);
-      grid.appendChild(card);
-    });
-    setupReveal();
-    setupProjectCarousels(list);
-    setupProjectTilt();
-    viewAllWrap.style.display = showAll ? "none" : "block";
-  }
-
-  viewAllBtn.addEventListener("click", () => {
-    showAll = true;
-    render();
-  });
-
-  render();
-}
-
-function setupProjectTilt() {
-  if (window.matchMedia("(hover: none)").matches) return; // skip on touch devices
-  const grid = document.getElementById("projectGrid");
-  if (!grid || grid.dataset.tiltBound) return; // delegate once, survives re-renders
-  grid.dataset.tiltBound = "1";
-
-  grid.addEventListener("mousemove", (e) => {
-    const card = e.target.closest(".project-card");
-    if (!card || !grid.contains(card)) return;
-    const rect = card.getBoundingClientRect();
-    const px = (e.clientX - rect.left) / rect.width - 0.5;
-    const py = (e.clientY - rect.top) / rect.height - 0.5;
-    // .reveal puts a 0.8s transition on transform — override it so tilt tracks the cursor live
-    card.style.transition = "transform .12s ease-out, box-shadow .45s ease";
-    card.style.transform =
-      `perspective(1100px) rotateX(${(-py * 3.5).toFixed(2)}deg) rotateY(${(px * 5).toFixed(2)}deg) translateY(-8px)`;
-  });
-
-  grid.addEventListener("mouseout", (e) => {
-    const card = e.target.closest(".project-card");
-    if (!card) return;
-    // only reset when the cursor genuinely leaves the card, not when moving between its children
-    if (e.relatedTarget && card.contains(e.relatedTarget)) return;
-    card.style.transition = "transform .5s cubic-bezier(.2,.8,.2,1), box-shadow .45s ease";
-    card.style.transform = "";
-  });
-}
-
-function setupProjectCarousels(list) {
-  document.querySelectorAll(".project-card").forEach((card) => {
-    const projectIndex = Number(card.dataset.project);
-    const project = list[projectIndex];
-    const media = card.querySelector(".project-media");
-    const layers = media.querySelectorAll(".media-img");
-    const dots = media.querySelectorAll(".dot");
-    const left = media.querySelector(".carousel-btn.left");
-    const right = media.querySelector(".carousel-btn.right");
-    let busy = false;
-
-    function show(index, dir) {
-      const total = project.images.length;
-      const idx = ((index % total) + total) % total;
-      if (busy || idx === Number(media.dataset.index)) return;
-      busy = true;
-
-      const current = media.querySelector(".media-img.active");
-      const next = [...layers].find((l) => l !== current);
-
-      const enter = () => {
-        // position the incoming layer just off-axis, then slide+fade it into place
-        next.classList.add("entering");
-        next.style.transform = `translateX(${dir > 0 ? 22 : -22}px) scale(1.04)`;
-        // force a reflow so the transition actually runs from this start state
-        void next.offsetWidth;
-        next.classList.add("active");
-        next.style.transform = "";
-        current.classList.remove("active");
-        current.style.transform = `translateX(${dir > 0 ? -22 : 22}px) scale(1.04)`;
-
-        setTimeout(() => {
-          next.classList.remove("entering");
-          current.style.transform = "";
-          busy = false;
-        }, 500);
-      };
-
-      media.dataset.index = idx;
-      dots.forEach((d, di) => d.classList.toggle("active", di === idx));
-
-      if (next.dataset.src === project.images[idx]) {
-        enter();
-      } else {
-        next.dataset.src = project.images[idx];
-        next.onload = enter;
-        next.onerror = () => { busy = false; };
-        next.src = project.images[idx];
-      }
-    }
-
-    if (left) left.addEventListener("click", (e) => { e.stopPropagation(); show(Number(media.dataset.index) - 1, -1); });
-    if (right) right.addEventListener("click", (e) => { e.stopPropagation(); show(Number(media.dataset.index) + 1, 1); });
-
-    media.addEventListener("click", () => {
-      openLightbox(project.images, Number(media.dataset.index));
-    });
-  });
-}
-
-/* ============================== SCROLL PROGRESS ============================== */
-
-function setupScrollProgress() {
-  const bar = document.getElementById("scrollProgress");
-  const update = () => {
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    bar.style.width = max > 0 ? `${(window.scrollY / max) * 100}%` : "0%";
-  };
-  window.addEventListener("scroll", update, { passive: true });
-  window.addEventListener("resize", update);
-  update();
-}
-
-/* ============================== CUSTOM CURSOR ============================== */
-
-function setupCustomCursor() {
-  if (window.matchMedia("(hover: none)").matches) return; // no cursor on touch
-  const dot = document.getElementById("customCursor");
-  const target = { x: innerWidth / 2, y: innerHeight / 2 };
-  const cur = { ...target };
-
-  addEventListener("mousemove", (e) => {
-    target.x = e.clientX;
-    target.y = e.clientY;
-    dot.classList.add("visible");
-  });
-  addEventListener("mouseleave", () => dot.classList.remove("visible"));
-
-  const INTERACTIVE = "a, button, .project-media, .view-all-btn, .tag, .discord-card, .price-card, input, textarea";
-  addEventListener("mouseover", (e) => {
-    if (e.target.closest(INTERACTIVE)) dot.classList.add("grow");
-  });
-  addEventListener("mouseout", (e) => {
-    if (e.target.closest(INTERACTIVE)) dot.classList.remove("grow");
-  });
-
-  (function loop() {
-    cur.x += (target.x - cur.x) * 0.22;
-    cur.y += (target.y - cur.y) * 0.22;
-    dot.style.transform = `translate(${cur.x}px, ${cur.y}px)`;
-    requestAnimationFrame(loop);
-  })();
-}
-
-/* ============================== MAGNETIC BUTTONS ============================== */
-
-function setupMagneticButtons() {
-  if (window.matchMedia("(hover: none)").matches) return;
-  const targets = document.querySelectorAll(".btn, .nav-contact, .view-all-btn");
-  targets.forEach((elm) => {
-    elm.classList.add("magnetic");
-    elm.addEventListener("mousemove", (e) => {
-      const r = elm.getBoundingClientRect();
-      const dx = e.clientX - (r.left + r.width / 2);
-      const dy = e.clientY - (r.top + r.height / 2);
-      elm.style.transition = "transform .15s ease-out";
-      elm.style.transform = `translate(${dx * 0.25}px, ${dy * 0.35}px)`;
-    });
-    elm.addEventListener("mouseleave", () => {
-      elm.style.transition = "transform .45s cubic-bezier(.2,1.3,.4,1)";
-      elm.style.transform = "";
-    });
-  });
-}
-
-/* ============================== TEXT SCRAMBLE ============================== */
-
-function setupScramble() {
-  const elm = document.getElementById("scrambleName");
-  if (!elm) return;
-  const finalText = elm.textContent;
-  const chars = "!<>-_\\/[]{}—=+*^?#01ABCDEFXYZ";
-  let frame = 0;
-
-  const queue = [...finalText].map((ch, i) => ({
-    ch,
-    start: Math.floor(Math.random() * 18),
-    end: Math.floor(Math.random() * 18) + 18 + i * 3,
-  }));
-
-  function tick() {
-    let out = "";
-    let done = 0;
-    queue.forEach((q) => {
-      if (frame >= q.end) {
-        out += q.ch;
-        done++;
-      } else if (frame >= q.start) {
-        out += chars[Math.floor(Math.random() * chars.length)];
-      } else {
-        out += "";
-      }
-    });
-    elm.textContent = out;
-    if (done === queue.length) return;
-    frame++;
-    requestAnimationFrame(tick);
-  }
-  tick();
-}
-
-/* ============================== STAT COUNTERS ============================== */
-
-function setupStatCounters() {
-  const nums = document.querySelectorAll(".hstat-num[data-to], .rs-metric-num[data-to]");
-  if (!nums.length) return;
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting || entry.target.dataset.done) return;
-      entry.target.dataset.done = "1";
-      const to = Number(entry.target.dataset.to);
-      const suffix = entry.target.dataset.suffix || "";
-      const dur = 1600;
-      const start = performance.now();
-      const step = (now) => {
-        const p = Math.min((now - start) / dur, 1);
-        const eased = 1 - Math.pow(1 - p, 3);
-        entry.target.textContent = Math.floor(eased * to) + suffix;
-        if (p < 1) requestAnimationFrame(step);
-        else entry.target.textContent = to + suffix;
-      };
-      requestAnimationFrame(step);
-      io.unobserve(entry.target);
-    });
-  }, { threshold: 0.4 });
+    { threshold: 0.5 }
+  );
   nums.forEach((n) => io.observe(n));
 }
 
-function setupReviewTilt() {
-  if (window.matchMedia("(hover: none)").matches) return; // skip on touch
-  document.querySelectorAll(".reviews-row").forEach((row) => {
-    if (row.dataset.tiltBound) return;
-    row.dataset.tiltBound = "1";
+/* ============================== NAV ============================== */
+/* Motivated: the nav is transparent over the hero image and needs a surface
+   once it sits over content, or the links become unreadable. */
 
-    row.addEventListener("mousemove", (e) => {
-      const card = e.target.closest(".review-card");
-      if (!card) return;
-      const r = card.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width;
-      const py = (e.clientY - r.top) / r.height;
+function setupNav() {
+  const nav = document.getElementById("nav");
+  const hero = document.getElementById("top");
+  const burger = document.getElementById("burger");
+  const sheet = document.getElementById("sheet");
 
-      // glare position, in the card's own coordinate space
-      card.style.setProperty("--mx", `${px * 100}%`);
-      card.style.setProperty("--my", `${py * 100}%`);
+  // A 1px sentinel just under the nav: once it scrolls out of view the nav is
+  // sitting over content rather than over the top of the hero, so it needs a surface.
+  if (hero && "IntersectionObserver" in window) {
+    const sentinel = document.createElement("div");
+    sentinel.style.cssText = "position:absolute;top:80px;left:0;width:1px;height:1px;pointer-events:none;";
+    hero.appendChild(sentinel);
+    const io = new IntersectionObserver(([e]) => nav.classList.toggle("solid", !e.isIntersecting), { threshold: 0 });
+    io.observe(sentinel);
+  } else {
+    nav.classList.add("solid");
+  }
 
-      card.style.transition = "transform .12s ease-out, border-color .35s ease, box-shadow .35s ease";
-      card.style.transform =
-        `perspective(900px) rotateX(${((0.5 - py) * 9).toFixed(2)}deg) rotateY(${((px - 0.5) * 11).toFixed(2)}deg) translateY(-6px) scale(1.03)`;
-    });
-
-    row.addEventListener("mouseout", (e) => {
-      const card = e.target.closest(".review-card");
-      if (!card) return;
-      if (e.relatedTarget && card.contains(e.relatedTarget)) return; // moving between children
-      card.style.transition = "transform .55s cubic-bezier(.2,.9,.3,1), border-color .35s ease, box-shadow .35s ease";
-      card.style.transform = "";
-    });
+  const closeSheet = () => {
+    sheet.hidden = true;
+    burger.setAttribute("aria-expanded", "false");
+  };
+  burger.addEventListener("click", () => {
+    const open = sheet.hidden;
+    sheet.hidden = !open;
+    burger.setAttribute("aria-expanded", String(open));
   });
+  sheet.querySelectorAll("a").forEach((a) => a.addEventListener("click", closeSheet));
+
+  // Mark the section currently in view
+  const links = [...document.querySelectorAll(".nav-links a")];
+  const targets = links.map((a) => document.querySelector(a.getAttribute("href"))).filter(Boolean);
+  if (targets.length && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          links.forEach((a) => a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id));
+        });
+      },
+      { rootMargin: "-45% 0px -50% 0px" }
+    );
+    targets.forEach((t) => io.observe(t));
+  }
 }
 
-/* ============================== LIGHTBOX ============================== */
+/* ============================== WORK ============================== */
+/* Layout: one full-bleed lead project, then an asymmetric grid.
+   Rhythm is 3+3 / 2+2+2 / 3+3 so no row repeats the one above it. */
 
-let lightboxState = { images: [], index: 0 };
+const GRID_SPANS = ["wide", "wide", "", "", "", "wide", "wide", "", ""];
 
-function setupLightbox() {
-  const box = document.getElementById("lightbox");
-  const closeBtn = document.getElementById("lightboxClose");
-  const prevBtn = document.getElementById("lightboxPrev");
-  const nextBtn = document.getElementById("lightboxNext");
-  closeBtn.addEventListener("click", closeLightbox);
-  prevBtn.addEventListener("click", (e) => { e.stopPropagation(); stepLightbox(-1); });
-  nextBtn.addEventListener("click", (e) => { e.stopPropagation(); stepLightbox(1); });
-  box.addEventListener("click", (e) => {
-    if (e.target === box) closeLightbox();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (box.style.display === "none") return;
-    if (e.key === "Escape") closeLightbox();
-    if (e.key === "ArrowLeft") stepLightbox(-1);
-    if (e.key === "ArrowRight") stepLightbox(1);
-  });
-}
+function renderWork() {
+  const mount = document.getElementById("workMount");
+  const [lead, ...rest] = PROJECTS;
 
-function openLightbox(images, index) {
-  lightboxState = { images, index };
-  renderLightbox();
-  document.getElementById("lightbox").style.display = "flex";
-}
-
-function stepLightbox(dir) {
-  const total = lightboxState.images.length;
-  lightboxState.index = ((lightboxState.index + dir) % total + total) % total;
-  renderLightbox();
-}
-
-function renderLightbox() {
-  const { images, index } = lightboxState;
-  const img = document.getElementById("lightboxImg");
-  img.classList.remove("swapping");
-  void img.offsetWidth; // restart the fade
-  img.classList.add("swapping");
-  img.src = images[index];
-  const nav = document.getElementById("lightboxNavWrap");
-  nav.style.display = images.length > 1 ? "flex" : "none";
-  document.getElementById("lightboxCounter").textContent = `${index + 1} / ${images.length}`;
-}
-
-function closeLightbox() {
-  document.getElementById("lightbox").style.display = "none";
-}
-
-/* ============================== PRICING ============================== */
-
-function renderPricing() {
-  const grid = document.getElementById("pricingGrid");
-  PRICING.forEach((tier, i) => {
-    const card = el(`
-      <div class="price-card reveal ${tier.featured ? "featured" : ""}" style="transition-delay:${i * 100}ms">
-        <div class="price-card-accent"></div>
-        <div class="price-card-body">
-          ${tier.featured ? `<span class="featured-tag">★ Most Popular</span>` : ""}
-          <div class="price-icon">${tier.icon}</div>
-          <h3>${tier.tier}</h3>
-          <div class="price-turnaround">${tier.turnaround}</div>
-          <div class="price-amount">${tier.price}<span> / project</span></div>
-          <p class="price-desc">${tier.desc}</p>
-          <ul class="price-features">
-            ${tier.features.map((f) => `<li>${ICON_CHECK}<span>${f}</span></li>`).join("")}
-          </ul>
-          <a href="#contact" data-goto="contact" class="btn ${tier.featured ? "btn-primary" : ""}">Order Now</a>
-        </div>
+  const leadNode = el(`
+    <button class="lead rv" type="button" data-i="0" aria-label="Open project: ${esc(lead.name)}">
+      <div class="lead-media">
+        <img src="${lead.images[0]}" alt="${esc(lead.name)}" loading="eager" width="1600" height="800" />
+        <span class="shots">${lead.count} shots</span>
       </div>
-    `);
-    grid.appendChild(card);
+      <div class="lead-cap">
+        <div>
+          <span class="mono">${esc(lead.year)} &nbsp;/&nbsp; ${esc(lead.role)}</span>
+          <h3>${esc(lead.name)}</h3>
+          ${tagsHTML(lead.tags)}
+        </div>
+        <span class="open-cue">Open project ${I_ARROW}</span>
+      </div>
+    </button>
+  `);
+  mount.appendChild(leadNode);
+
+  const grid = el('<div class="grid"></div>');
+  rest.forEach((p, i) => {
+    const idx = i + 1;
+    grid.appendChild(
+      el(`
+      <button class="card rv ${GRID_SPANS[i] || ""}" type="button" data-i="${idx}" aria-label="Open project: ${esc(p.name)}">
+        <div class="card-media">
+          <img src="${p.images[0]}" alt="${esc(p.name)}" loading="lazy" width="1600" height="800" />
+          <span class="shots">${p.count}</span>
+        </div>
+        <div class="card-cap">
+          <h3>${esc(p.name)}</h3>
+          ${tagsHTML(p.tags.slice(0, 2))}
+        </div>
+      </button>
+    `)
+    );
   });
-  setupReveal();
-  setupPricingTilt();
+  mount.appendChild(grid);
+
+  mount.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-i]");
+    if (btn) openProject(Number(btn.dataset.i));
+  });
 }
 
-function setupPricingTilt() {
-  document.querySelectorAll(".price-card").forEach((card) => {
-    card.addEventListener("mousemove", (e) => {
-      const rect = card.getBoundingClientRect();
-      const px = (e.clientX - rect.left) / rect.width - 0.5;
-      const py = (e.clientY - rect.top) / rect.height - 0.5;
-      card.style.transform = `rotateX(${(-py * 6).toFixed(2)}deg) rotateY(${(px * 8).toFixed(2)}deg) translateY(-4px)`;
-    });
-    card.addEventListener("mouseleave", () => {
-      card.style.transform = "";
-    });
+/* ============================== CRAFT ============================== */
+
+function renderCraft() {
+  const mount = document.getElementById("craftMount");
+  CRAFT.forEach((c) => {
+    if (c.kind === "image") {
+      mount.appendChild(
+        el(`
+        <div class="cell tall rv">
+          <div class="cell-img"><img src="${c.img}" alt="" loading="lazy" /></div>
+          <div class="cell-body">
+            <h3>${esc(c.title)}</h3>
+            <p>${esc(c.body)}</p>
+          </div>
+        </div>
+      `)
+      );
+    } else if (c.kind === "figure") {
+      mount.appendChild(
+        el(`
+        <div class="cell span4 rv">
+          <span class="cell-n">${esc(c.n)}${esc(c.suffix)}</span>
+          <h3>${esc(c.title)}</h3>
+          <p>${esc(c.body)}</p>
+        </div>
+      `)
+      );
+    } else {
+      mount.appendChild(
+        el(`
+        <div class="cell ${c.kind === "accent" ? "span4 accent" : "span2"} rv">
+          <h3>${esc(c.title)}</h3>
+          <p>${esc(c.body)}</p>
+        </div>
+      `)
+      );
+    }
   });
 }
 
 /* ============================== REVIEWS ============================== */
-
-function reviewCardHTML(r) {
-  return `
-    <div class="review-card">
-      <span class="review-watermark">${ICON_QUOTE}</span>
-      <div class="review-stars">${Array.from({ length: 5 }).map((_, s) => ICON_STAR(s < r.rating)).join("")}</div>
-      <p class="review-quote">${r.quote}</p>
-      <div class="review-foot">
-        <span class="review-avatar-wrap">
-          <img class="review-avatar" src="${r.avatar}" alt="${r.name}" loading="lazy" decoding="async" onerror="this.outerHTML='<div class=&quot;review-avatar&quot;>${r.name.slice(0, 2).toUpperCase()}</div>'" />
-        </span>
-        <div class="review-meta">
-          <div class="review-name">${r.name}</div>
-          <div class="review-role">${ICON_VERIFIED} Verified client</div>
-        </div>
-      </div>
-    </div>`;
-}
+/* Motivated: breadth over depth. Eight short quotes read better moving than
+   stacked in a list nobody finishes. Pauses on hover, stops under
+   prefers-reduced-motion (handled in CSS). */
 
 function renderReviews() {
-  // Two rows moving in opposite directions; split the list so they aren't identical
-  const half = Math.ceil(REVIEWS.length / 2);
-  const rowA = REVIEWS.slice(0, half);
-  const rowB = REVIEWS.slice(half);
-
-  const fill = (trackId, items) => {
-    const track = document.getElementById(trackId);
-    if (!track) return;
-    const base = Array(4).fill(items).flat();       // wide enough for any screen
-    const list = [...base, ...base];                 // exact duplicate -> seamless -50% loop
-    track.innerHTML = list.map(reviewCardHTML).join("");
-  };
-
-  fill("reviewsTrack", rowA);
-  fill("reviewsTrackB", rowB);
-  setupReviewTilt();
-
-  // Aggregate rating summary, computed from the real data
-  const avg = REVIEWS.reduce((s, r) => s + r.rating, 0) / REVIEWS.length;
-  const avgEl = document.getElementById("ratingAvg");
-  if (avgEl) avgEl.textContent = avg.toFixed(1);
-  const starsEl = document.getElementById("ratingStars");
-  if (starsEl) {
-    starsEl.innerHTML = Array.from({ length: 5 })
-      .map((_, i) => ICON_STAR(i < Math.round(avg)))
-      .join("");
-  }
+  const track = document.getElementById("voicesMount");
+  const card = (r) => `
+    <figure class="quote">
+      <div class="stars" aria-label="${r.rating} out of 5">${[1, 2, 3, 4, 5].map((n) => I_STAR(n <= r.rating)).join("")}</div>
+      <p>${esc(r.quote)}</p>
+      <figcaption class="quote-by">
+        <img src="${r.avatar}" alt="" loading="lazy" width="34" height="34" />
+        <span>
+          <span class="quote-name">${esc(r.name)}</span><br />
+          <span class="quote-role">${esc(r.role)}</span>
+        </span>
+      </figcaption>
+    </figure>`;
+  // duplicated once so the -50% keyframe loops seamlessly
+  track.innerHTML = REVIEWS.map(card).join("") + REVIEWS.map(card).join("");
 }
 
 /* ============================== TOOLS ============================== */
 
 function renderTools() {
-  const track = document.getElementById("toolsTrack");
-  const baseRepeats = 6; // tool items are narrow, need more repeats to cover wide screens
-  const base = Array(baseRepeats).fill(TOOLS).flat();
-  const list = [...base, ...base]; // exact duplicate -> -50% is always a perfect seam
-  track.innerHTML = list.map((t) => `
-    <div class="tool-item">
-      <span class="tool-icon-slot">
-        ${t.type === "custom" ? t.svg : `<img class="tool-logo" width="26" height="26" loading="lazy" decoding="async" src="${t.src}" alt="${t.label}" onerror="this.style.visibility='hidden'" />`}
-      </span>
-      <span>${t.label}</span>
-    </div>
-  `).join("");
+  const mount = document.getElementById("toolsMount");
+  mount.innerHTML = TOOLS.map(
+    (t) =>
+      `<span class="tool"><img src="${t.src}" alt="" loading="lazy" width="19" height="19" onerror="this.remove()" />${esc(t.label)}</span>`
+  ).join("");
+}
+
+/* ============================== SCOPE ============================== */
+
+function renderScope() {
+  const mount = document.getElementById("scopeMount");
+  mount.innerHTML = SCOPE.map(
+    (s) => `<div class="scope-row"><strong>${esc(s.label)}</strong><span>${esc(s.detail)}</span></div>`
+  ).join("");
+}
+
+/* ============================== DISCORD CARD MARKUP ============================== */
+/* The ids below are what renderDiscordPresence() writes into. Keep them. */
+
+function renderDiscordShell() {
+  document.getElementById("discordMount").innerHTML = `
+    <div class="dc">
+      <div class="dc-banner"></div>
+      <a class="dc-top" href="${DISCORD_URL}" target="_blank" rel="noreferrer">
+        <span class="dc-av-wrap">
+          <span class="dc-av" id="discordAvatarFallback">f</span>
+          <img class="dc-av" id="discordAvatarImg" style="display:none" alt="f34r's Discord avatar" />
+          <img class="dc-deco" id="discordAvatarDecoration" style="display:none" alt="" />
+          <span class="dc-status" id="discordStatusDot" style="background:#80848e"></span>
+        </span>
+        <span class="dc-info">
+          <span class="dc-name">
+            <b class="discord-username">f34r</b>
+            <span class="dc-tag" id="discordClanTag" style="display:none"></span>
+            <span class="dc-handle">@f34r_r</span>
+          </span>
+          <span class="dc-badges" id="discordBadges"></span>
+          <span class="dc-bio">Roblox builder and scripter</span>
+          <span class="dc-cs" id="discordCustomStatus" style="display:none"></span>
+        </span>
+      </a>
+      <div class="dc-act" id="discordActivity" style="display:none">
+        <div class="dc-act-ic" id="activityIcon">${I_CODE}</div>
+        <div>
+          <div class="dc-act-l"><span id="activityType">PLAYING</span> &nbsp;<span id="activityElapsed">00:00:00</span> ELAPSED</div>
+          <div class="dc-act-n" id="activityName"></div>
+          <div class="dc-act-d" id="activityDetail"></div>
+        </div>
+      </div>
+      <div class="dc-foot">
+        <a class="btn btn-accent" href="${DISCORD_URL}" target="_blank" rel="noreferrer">${I_CHAT} Start a project</a>
+      </div>
+    </div>`;
+}
+
+/* ============================== PROJECT DETAIL ============================== */
+
+let detailNode = null;
+let lastFocus = null;
+
+function openProject(i) {
+  const p = PROJECTS[i];
+  if (!p) return;
+  lastFocus = document.activeElement;
+  closeProject(true);
+
+  const next = PROJECTS[(i + 1) % PROJECTS.length];
+  detailNode = el(`
+    <div class="detail" role="dialog" aria-modal="true" aria-label="${esc(p.name)}">
+      <div class="detail-bar">
+        <span class="mono">${esc(p.name)}</span>
+        <button class="icon-btn" data-close aria-label="Close project">${I_CLOSE}</button>
+      </div>
+      <div class="wrap detail-head">
+        <h2>${esc(p.name)}</h2>
+        <p>${esc(p.desc)}</p>
+        <div class="detail-meta">
+          <div><span class="mono">Year</span><span style="margin-top:6px">${esc(p.year)}</span></div>
+          <div><span class="mono">Role</span><span style="margin-top:6px">${esc(p.role)}</span></div>
+          <div><span class="mono">Style</span><span style="margin-top:6px">${esc(p.tags.join(", "))}</span></div>
+        </div>
+      </div>
+      <div class="wrap detail-shots">
+        ${p.images
+          .map(
+            (src, n) =>
+              `<button class="shot" type="button" data-shot="${n}" aria-label="Enlarge image ${n + 1}"><img src="${src}" alt="${esc(p.name)}, image ${n + 1}" loading="${n < 2 ? "eager" : "lazy"}" /></button>`
+          )
+          .join("")}
+      </div>
+      <div class="detail-next">
+        <div class="wrap">
+          <button type="button" data-next="${(i + 1) % PROJECTS.length}">
+            <span>
+              <span class="mono">Next project</span>
+              <h3 style="margin-top:10px">${esc(next.name)}</h3>
+            </span>
+            <span class="open-cue">Open ${I_ARROW}</span>
+          </button>
+        </div>
+      </div>
+    </div>`);
+
+  document.body.appendChild(detailNode);
+  document.documentElement.classList.add("no-scroll");
+  requestAnimationFrame(() => detailNode.classList.add("in"));
+  detailNode.querySelector("[data-close]").focus();
+
+  detailNode.addEventListener("click", (e) => {
+    if (e.target.closest("[data-close]")) return closeProject();
+    const shot = e.target.closest("[data-shot]");
+    if (shot) return openLightbox(p.images, Number(shot.dataset.shot));
+    const nxt = e.target.closest("[data-next]");
+    if (nxt) {
+      detailNode.scrollTop = 0;
+      openProject(Number(nxt.dataset.next));
+    }
+  });
+}
+
+function closeProject(silent) {
+  if (!detailNode) return;
+  detailNode.remove();
+  detailNode = null;
+  if (silent) return;
+  document.documentElement.classList.remove("no-scroll");
+  if (lastFocus) lastFocus.focus();
+}
+
+/* ============================== LIGHTBOX ============================== */
+
+let lbNode = null;
+let lbImages = [];
+let lbIndex = 0;
+
+function openLightbox(images, index) {
+  lbImages = images;
+  lbIndex = index;
+  if (lbNode) lbNode.remove();
+  lbNode = el(`
+    <div class="lb" role="dialog" aria-modal="true" aria-label="Image viewer">
+      <img alt="" />
+      <button class="icon-btn lb-close" data-lb-close aria-label="Close">${I_CLOSE}</button>
+      <button class="icon-btn lb-nav lb-prev" data-lb-step="-1" aria-label="Previous image">${I_PREV}</button>
+      <button class="icon-btn lb-nav lb-next" data-lb-step="1" aria-label="Next image">${I_NEXT}</button>
+      <span class="lb-count"></span>
+    </div>`);
+  document.body.appendChild(lbNode);
+  paintLightbox();
+  requestAnimationFrame(() => lbNode.classList.add("in"));
+  lbNode.querySelector("[data-lb-close]").focus();
+
+  lbNode.addEventListener("click", (e) => {
+    const step = e.target.closest("[data-lb-step]");
+    if (step) return stepLightbox(Number(step.dataset.lbStep));
+    if (e.target.closest("[data-lb-close]") || e.target === lbNode) closeLightbox();
+  });
+}
+
+function paintLightbox() {
+  const single = lbImages.length < 2;
+  lbNode.querySelector("img").src = lbImages[lbIndex];
+  lbNode.querySelector(".lb-count").textContent = `${lbIndex + 1} / ${lbImages.length}`;
+  lbNode.querySelectorAll(".lb-nav").forEach((b) => (b.hidden = single));
+}
+
+function stepLightbox(d) {
+  lbIndex = (lbIndex + d + lbImages.length) % lbImages.length;
+  paintLightbox();
+}
+
+function closeLightbox() {
+  if (!lbNode) return;
+  lbNode.remove();
+  lbNode = null;
+}
+
+function setupKeys() {
+  document.addEventListener("keydown", (e) => {
+    if (lbNode) {
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowRight") stepLightbox(1);
+      if (e.key === "ArrowLeft") stepLightbox(-1);
+      return;
+    }
+    if (detailNode && e.key === "Escape") closeProject();
+  });
 }
 
 /* ============================== DISCORD CARD (Lanyard live presence + real badges) ============================== */
@@ -1087,27 +867,19 @@ function setupDiscordCard() {
 
   connect();
 }
-
 /* ============================== INIT ============================== */
 
 document.addEventListener("DOMContentLoaded", () => {
-  buildWaveField();
-  buildEmbers();
-  setupCursorGlow();
-  setupScrollProgress();
-  setupCustomCursor();
-  setupScramble();
-  setupStatCounters();
-  setupClock();
-  setupLightbox();
-  renderProjects();
-  renderPricing();
+  renderWork();
+  renderCraft();
   renderReviews();
   renderTools();
-  setupDiscordCard();
+  renderScope();
+  renderDiscordShell();
 
-  const smoothScroll = setupSmoothScroll();
-  setupNav(smoothScroll);
+  setupNav();
   setupReveal();
-  setupMagneticButtons();
+  setupCountUp();
+  setupKeys();
+  setupDiscordCard();
 });

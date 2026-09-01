@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#e11d2e" />
+  <meta name="theme-color" content="#08070a" />
   <meta name="color-scheme" content="dark" />
   <meta name="description" content="Roblox map builder and environment designer. 5+ years building interiors, terrain, and full environments for games with 400M+ combined visits." />
   <meta name="keywords" content="fear, f34r, Roblox builder, Roblox developer, portfolio, environment design, map building, terrain" />
@@ -11,7 +11,7 @@
 
   <!-- Open Graph (Discord, Facebook, LinkedIn) -->
   <meta property="og:site_name" content="f34r.dev" />
-  <meta property="og:title" content="f34r — Roblox Map Builder &amp; Environment Designer" />
+  <meta property="og:title" content="f34r &mdash; Roblox Map Builder &amp; Environment Designer" />
   <meta property="og:description" content="5+ years building interiors, terrain, and full environments. Contributed to 400M+ visits across front-page Roblox games." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://f34r.dev/" />
@@ -19,319 +19,131 @@
   <meta property="og:image:type" content="image/jpeg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="f34r — Roblox Map Builder and Environment Designer" />
+  <meta property="og:image:alt" content="f34r, Roblox Map Builder and Environment Designer" />
 
   <!-- Twitter / X -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="f34r — Roblox Map Builder &amp; Environment Designer" />
+  <meta name="twitter:title" content="f34r &mdash; Roblox Map Builder &amp; Environment Designer" />
   <meta name="twitter:description" content="5+ years building interiors, terrain, and full environments. Contributed to 400M+ visits across front-page Roblox games." />
   <meta name="twitter:image" content="https://f34r.dev/img/og-cover.jpg" />
 
   <link rel="canonical" href="https://f34r.dev/" />
   <title>f34r's Portfolio</title>
   <link rel="icon" href="img/logo.webp" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="image" href="img/astral-lounge/1.webp" fetchpriority="high" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-  <div class="wave-field" id="waveField">
-    <svg viewBox="0 0 1200 720" preserveAspectRatio="none" class="wave-svg" id="waveSvg">
-      <defs>
-        <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#0a0713" stop-opacity="0" />
-          <stop offset="45%" stop-color="#e11d2e" stop-opacity="0.7" />
-          <stop offset="100%" stop-color="#ffc86b" stop-opacity="0.95" />
-        </linearGradient>
-        <filter id="waveBlur"><feGaussianBlur stdDeviation="0.4" /></filter>
-      </defs>
-      <g id="waveLines"></g>
-    </svg>
-    <div class="wave-vignette"></div>
-    <div class="embers" id="embers"></div>
-  </div>
-  <div class="grain"></div>
+<div class="grain"></div>
 
-  <div class="scroll-progress" id="scrollProgress"></div>
-  <div class="custom-cursor" id="customCursor"></div>
-  <div class="cursor-glow" id="cursorGlow"></div>
-  <div class="cursor-dust" id="cursorDust"></div>
-
-  <!-- NAV -->
-  <div class="nav-wrap">
-    <div class="nav-pill">
-      <a class="nav-logo" href="#home" data-goto="home"><img src="img/logo.webp" alt="f34r logo" /></a>
-      <a href="#home" class="nav-link" data-goto="home">Home</a>
-      <a href="#projects" class="nav-link" data-goto="projects">Projects</a>
-      <a href="#contact" class="nav-contact" data-goto="contact">
-        Contact
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
-      </a>
-      <button class="nav-toggle" id="navToggle" aria-label="Menu">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-      </button>
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="nav-in">
+    <a class="nav-logo" href="#top"><img src="img/logo.webp" alt="" width="26" height="26" />f34r</a>
+    <div class="nav-links">
+      <a href="#work">Work</a>
+      <a href="#craft">Craft</a>
+      <a href="#clients">Clients</a>
     </div>
-  </div>
-  <div class="mobile-sheet" id="mobileSheet" style="display:none;">
-    <a href="#home" data-goto="home">Home</a>
-    <a href="#projects" data-goto="projects">Projects</a>
-    <a href="#contact" data-goto="contact">Contact</a>
-  </div>
-
-  <!-- HOME PAGE -->
-  <div id="homePage">
-
-    <header id="home" class="hero">
-      <div class="container hero-inner">
-        <h1>Hi, I'm <span class="grad" id="scrambleName">f34r.</span></h1>
-        <p class="hero-role">Roblox Map Builder &amp; Environment Designer</p>
-        <div class="hero-stats" id="heroStats">
-          <div class="hstat"><span class="hstat-num" data-to="5" data-suffix="+">0</span><span class="hstat-label">Years Experience</span></div>
-          <div class="hstat"><span class="hstat-num" data-to="400" data-suffix="M+">0</span><span class="hstat-label">Visits Contributed</span></div>
-          <div class="hstat"><span class="hstat-num" data-to="50" data-suffix="+">0</span><span class="hstat-label">Projects Built</span></div>
-        </div>
-        <div class="hero-ctas">
-          <a href="#projects" data-goto="projects" class="btn btn-primary">View Work
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
-          </a>
-          <a href="#about" class="btn btn-ghost">About Me</a>
-        </div>
-      </div>
-    </header>
-
-    <!-- ABOUT -->
-    <div class="section-divider"></div>
-    <section id="about" class="section">
-      <div class="container">
-        <div class="section-head reveal">
-          <h2>About Me</h2>
-        </div>
-        <div class="about-text reveal" style="transition-delay:80ms">
-          <p>I'm f34r, a 18-year-old Roblox builder with nearly 5 years of development experience. I've worked on everything from anime-inspired worlds to low-poly simulators, cartoony builds, and detailed high-poly environments and terrain.</p>
-          <p>My style is flexible — whether you need a polished arena, immersive terrain, or a full map with props and assets. If you can imagine it, I can build it.</p>
-        </div>
-
-        <div class="stat-strip reveal" style="transition-delay:140ms">
-          <div class="stat-item">
-            <svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-            <div><span class="stat-label">Status</span><span class="stat-value">Available</span></div>
-          </div>
-          <div class="stat-item">
-            <svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-            <div><span class="stat-label">Experience</span><span class="stat-value">5+ Years</span></div>
-          </div>
-          <div class="stat-item">
-            <svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            <div><span class="stat-label">My Time</span><span class="stat-value" id="localTime">--:--</span></div>
-          </div>
-        </div>
-
-        <div class="discord-card-wrap reveal" style="transition-delay:200ms">
-          <div class="discord-card" id="discordCard">
-            <div class="discord-banner"></div>
-            <a href="https://discord.com/users/1088022144308486176" target="_blank" rel="noreferrer" class="discord-top">
-              <div class="discord-avatar-wrap">
-                <div class="discord-avatar discord-avatar-fallback" id="discordAvatarFallback">f</div>
-                <img class="discord-avatar" id="discordAvatarImg" style="display:none" alt="f34r's Discord avatar" />
-                <img class="discord-avatar-decoration" id="discordAvatarDecoration" style="display:none" alt="" />
-                <span class="discord-status-dot" id="discordStatusDot" style="background:#80848e"></span>
-              </div>
-              <div class="discord-info">
-                <div class="discord-name-row">
-                  <span class="discord-username">f34r</span>
-                  <span class="discord-clan-tag" id="discordClanTag" style="display:none"></span>
-                  <span class="discord-handle">@f34r_r</span>
-                </div>
-                <div class="discord-badges" id="discordBadges"></div>
-                <div class="discord-bio">Roblox Builder &amp; Scripter</div>
-                <div class="discord-custom-status" id="discordCustomStatus" style="display:none"></div>
-              </div>
-            </a>
-            <div class="discord-activity" id="discordActivity" style="display:none">
-              <div class="activity-icon" id="activityIcon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-              </div>
-              <div class="activity-info">
-                <div class="activity-label"><span id="activityType">PLAYING</span> <span class="activity-dot">•</span> <span id="activityElapsed">00:00:00</span> ELAPSED</div>
-                <div class="activity-name" id="activityName"></div>
-                <div class="activity-detail" id="activityDetail"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- HIGHLIGHTS -->
-    <section class="section">
-      <div class="container">
-        <div class="section-head reveal"><h2>Highlights</h2></div>
-        <div class="timeline">
-          <div class="timeline-item reveal">
-            <div class="timeline-ic">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
-            </div>
-            <div>
-              <div class="timeline-title">Solo Roblox Builder</div>
-              <div class="timeline-desc">Nearly five years building for Roblox — from anime-inspired worlds to low-poly simulators, cartoony builds, and detailed high-poly environments and terrain.</div>
-            </div>
-            <div class="timeline-date">5+ Years</div>
-          </div>
-          <div class="timeline-item reveal" style="transition-delay:90ms">
-            <div class="timeline-ic">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
-            </div>
-            <div>
-              <div class="timeline-title">Front-Page Contributor</div>
-              <div class="timeline-desc">Contributed to front-page games totalling over 400M+ visits across the environments and terrain built for them.</div>
-            </div>
-            <div class="timeline-date">Ongoing</div>
-          </div>
-          <div class="timeline-item reveal" style="transition-delay:180ms">
-            <div class="timeline-ic">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h.01M10 12h.01"/><circle cx="16" cy="12" r="2"/></svg>
-            </div>
-            <div>
-              <div class="timeline-title">Optimization-First Workflow</div>
-              <div class="timeline-desc">Every build is optimized to stay smooth, even on the slowest of devices, without sacrificing detail.</div>
-            </div>
-            <div class="timeline-date">Every Project</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- PROJECTS -->
-    <div class="section-divider flip"></div>
-    <section id="projects" class="section">
-      <div class="container">
-        <div class="section-head reveal">
-          <span class="section-eyebrow">Portfolio</span>
-          <h2>Selected <span class="grad">Work</span></h2>
-          <p>A selection of maps, interiors, and terrain built for live Roblox games.</p>
-        </div>
-        <div class="project-grid" id="projectGrid"></div>
-        <div class="view-all-wrap" id="viewAllWrap">
-          <span class="view-all-btn" id="viewAllBtn">View All Projects
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
-          </span>
-        </div>
-      </div>
-    </section>
-
-    <!-- PRICING -->
-    <div class="section-divider"></div>
-    <section id="pricing" class="section">
-      <div class="container">
-        <div class="section-head reveal">
-          <h2>Pricing</h2>
-          <p>Professional building services tailored to your project's scope.</p>
-        </div>
-        <div class="pricing-grid" id="pricingGrid"></div>
-      </div>
-    </section>
-
-    <!-- REVIEWS -->
-    <div class="section-divider flip"></div>
-    <section class="section reviews-section">
-      <div class="container">
-        <div class="section-head reveal">
-          <span class="section-eyebrow">Testimonials</span>
-          <h2>What Clients <span class="grad">Say</span></h2>
-          <p>Feedback from developers and studios I've built for.</p>
-        </div>
-
-        <div class="rating-summary reveal">
-          <div class="rs-score">
-            <span class="rs-num" id="ratingAvg">4.9</span>
-            <div class="rs-stars" id="ratingStars"></div>
-            <span class="rs-sub">Average rating</span>
-          </div>
-          <div class="rs-divider"></div>
-          <div class="rs-metrics">
-            <div class="rs-metric"><span class="rs-metric-num" data-to="8" data-suffix="">0</span><span class="rs-metric-label">Reviews</span></div>
-            <div class="rs-metric"><span class="rs-metric-num" data-to="100" data-suffix="%">0</span><span class="rs-metric-label">Would Recommend</span></div>
-            <div class="rs-metric"><span class="rs-metric-num" data-to="7" data-suffix="">0</span><span class="rs-metric-label">Five-Star</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="marquee-wrap reviews-row">
-        <div class="marquee-track" id="reviewsTrack"></div>
-      </div>
-      <div class="marquee-wrap reviews-row">
-        <div class="marquee-track reverse" id="reviewsTrackB"></div>
-      </div>
-    </section>
-
-    <!-- TOOLS -->
-    <section class="section">
-      <div class="container">
-        <div class="section-head reveal">
-          <h2>Software &amp; Tools</h2>
-          <p>My daily drivers for building and collaboration.</p>
-        </div>
-      </div>
-      <div class="marquee-wrap tools-wrap">
-        <div class="tools-track" id="toolsTrack"></div>
-      </div>
-    </section>
-
-    <footer class="footer">
-      <span class="footer-copy">© 2026 f34r.dev</span>
-    </footer>
-  </div>
-
-  <!-- CONTACT PAGE -->
-  <div id="contactPage" style="display:none">
-    <section class="contact-page">
-      <div class="container">
-        <div class="contact-band contact-band-full reveal in-view">
-          <h2>Ready to Work?</h2>
-          <p>Have a project in mind? Let's discuss how to bring your vision to life. Note: I don't offer refunds on delivered work.</p>
-          <div class="contact-ctas">
-            <a href="https://discord.com/users/1088022144308486176" target="_blank" rel="noreferrer" class="btn btn-primary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              Message on Discord
-            </a>
-            <span class="status-chip"><span class="pulse-dot"></span> Available for commissions</span>
-          </div>
-        </div>
-      </div>
-    </section>
-    <footer class="footer">
-      <span class="footer-copy">© 2026 f34r.dev</span>
-    </footer>
-  </div>
-
-  <!-- LIGHTBOX -->
-  <div class="lightbox" id="lightbox" style="display:none">
-    <button class="lightbox-close" id="lightboxClose">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    <a href="#start" class="nav-cta">Start a project</a>
+    <button class="nav-burger" id="burger" aria-label="Menu" aria-expanded="false">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
     </button>
-    <img id="lightboxImg" src="" alt="" />
-    <div class="lightbox-nav-wrap" id="lightboxNavWrap" style="display:none">
-      <button class="lightbox-nav" id="lightboxPrev" aria-label="Previous">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg>
-      </button>
-      <button class="lightbox-nav" id="lightboxNext" aria-label="Next">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 18 6-6-6-6"/></svg>
-      </button>
-    </div>
-    <span class="lightbox-counter" id="lightboxCounter"></span>
   </div>
+</nav>
+<div class="sheet" id="sheet" hidden>
+  <a href="#work">Work</a>
+  <a href="#craft">Craft</a>
+  <a href="#clients">Clients</a>
+  <a href="#start">Start a project</a>
+</div>
 
-  <script src="script.js"></script>
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="hero-media">
+    <img src="img/astral-lounge/1.webp" alt="Art deco lounge interior built in Roblox Studio" width="1600" height="805" fetchpriority="high" />
+  </div>
+  <div class="hero-in">
+    <h1>Worlds that hold up<br />at 400 million visits.</h1>
+    <p class="hero-sub">I build interiors, terrain, and full environments for Roblox games. Detailed enough to sell the world, light enough to run on a phone.</p>
+    <div class="hero-ctas">
+      <a href="#work" class="btn btn-solid">See the work
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      </a>
+      <a href="#start" class="btn btn-line">Start a project</a>
+    </div>
+    <div class="hero-figures rv">
+      <div><span class="fig-n" data-to="5" data-suffix="+">0</span><span class="fig-l">Years building</span></div>
+      <div><span class="fig-n" data-to="400" data-suffix="M+">0</span><span class="fig-l">Visits contributed</span></div>
+      <div><span class="fig-n" data-to="50" data-suffix="+">0</span><span class="fig-l">Projects delivered</span></div>
+    </div>
+  </div>
+</header>
 
-  <!-- Vercel Web Analytics (static HTML — no npm package needed) -->
-  <script>
-    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-  </script>
-  <script defer src="/_vercel/insights/script.js"></script>
+<!-- WORK -->
+<main>
+<section class="sec" id="work">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="mono">Selected work</span>
+      <h2 style="margin-top:14px">Ten builds, start to finish.</h2>
+      <p>Every one of these shipped into a live game. Open any project for the full set of shots.</p>
+    </div>
+  </div>
+  <div class="wrap" id="workMount"></div>
+</section>
 
-  <!-- Vercel Speed Insights -->
-  <script>
-    window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-  </script>
-  <script defer src="/_vercel/speed-insights/script.js"></script>
+<!-- CRAFT -->
+<section class="sec" id="craft" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head rv"><h2>How I build.</h2></div>
+    <div class="bento" id="craftMount"></div>
+  </div>
+</section>
+</main>
+
+<!-- CLIENTS -->
+<section class="sec voices" id="clients">
+  <div class="wrap">
+    <div class="sec-head rv" style="margin-bottom:38px"><h2>What clients say.</h2></div>
+  </div>
+  <div class="mq"><div class="mq-track" id="voicesMount"></div></div>
+  <div class="wrap" style="margin-top:clamp(64px,9vh,110px)">
+    <div class="sec-head rv" style="margin-bottom:28px"><h2 style="font-size:clamp(1.3rem,2.4vw,1.7rem)">Built with</h2></div>
+    <div class="tools rv" id="toolsMount"></div>
+  </div>
+</section>
+
+<!-- START -->
+<section class="sec" id="start">
+  <div class="wrap start start-grid">
+    <div class="rv">
+      <h2>Have a map in mind?</h2>
+      <p class="start-lede">Tell me the game, the scope, and roughly what you are working with. I will come back with a plan, a timeline, and a quote.</p>
+      <div class="scope" id="scopeMount"></div>
+      <p class="avail"><span class="dot"></span> Available for commissions</p>
+    </div>
+    <div class="rv" id="discordMount"></div>
+  </div>
+</section>
+
+<footer class="wrap foot">
+  <span>&copy; 2026 f34r.dev</span>
+  <a href="https://discord.com/users/1088022144308486176" target="_blank" rel="noreferrer">Discord</a>
+</footer>
+
+<script src="script.js"></script>
+
+<!-- Vercel Web Analytics (static HTML, no npm package needed) -->
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+
+<!-- Vercel Speed Insights -->
+<script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
 </body>
 </html>
