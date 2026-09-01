@@ -1,5 +1,56 @@
 /* ============================== DATA ============================== */
 
+const AMBIENT = {
+  "img/enchanted": [
+    "#b3199c",
+    "#5a1ecc"
+  ],
+  "img/wizard-tower": [
+    "#e0521a",
+    "#8c1206"
+  ],
+  "img/astral-lounge": [
+    "#d99a2b",
+    "#7a3f10"
+  ],
+  "img/astral-promenade": [
+    "#c9955c",
+    "#2f5a86"
+  ],
+  "img/castle": [
+    "#4b7f96",
+    "#2a4a63"
+  ],
+  "img/cathedral": [
+    "#8a5a1e",
+    "#2a1408"
+  ],
+  "img/igris": [
+    "#a81f2a",
+    "#3d0a12"
+  ],
+  "img/ranked": [
+    "#0e9fbd",
+    "#123f7a"
+  ],
+  "img/rpg": [
+    "#9a5c22",
+    "#33170a"
+  ],
+  "img/grave": [
+    "#1f3f8c",
+    "#c4661a"
+  ],
+  "img/Studs": [
+    "#0fbf9c",
+    "#0d5f6e"
+  ],
+  "img/cartoon": [
+    "#4a5c6b",
+    "#22303b"
+  ]
+};
+
 const PROJECTS = [
   {
     name: "Enchanted Grove",
@@ -97,7 +148,13 @@ const PROJECTS = [
     desc: "A cartoon-style ruined house, kept intentionally low-poly to fit a stylized, lightweight game world.",
     folder: "img/cartoon", count: 3,
   },
-].map((p) => ({ ...p, images: Array.from({ length: p.count }, (_, i) => `${p.folder}/${i + 1}.webp`) }));
+].map((p) => ({
+  ...p,
+  images: Array.from({ length: p.count }, (_, i) => `${p.folder}/${i + 1}.webp`),
+  // Ambient pair sampled from the build itself. The page background is lit by
+  // whichever build you are looking at, so it is never a flat black field.
+  amb: AMBIENT[p.folder] || ["#2f3566", "#3a2350"],
+}));
 
 const CRAFT = [
   {
@@ -186,10 +243,13 @@ function el(html) {
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const tagsHTML = (tags) => `<div class="tags">${tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div>`;
 
-/* ============================== REVEAL ON SCROLL ============================== */
+/* ============================== REVEAL ON SCROLL ==============================
+   CSS owns every entrance on this page. This adds one class and gets out of the
+   way. GSAP is never pointed at the same properties, which is what previously
+   left a whole section stuck at opacity 0. */
 
 function setupReveal() {
-  const items = document.querySelectorAll(".rv");
+  const items = document.querySelectorAll(".rv, .rv-g, .rule, .ln");
   if (!("IntersectionObserver" in window)) {
     items.forEach((n) => n.classList.add("in"));
     return;
@@ -202,14 +262,14 @@ function setupReveal() {
         io.unobserve(e.target);
       });
     },
-    { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+    { threshold: 0.08, rootMargin: "0px 0px -6% 0px" }
   );
   items.forEach((n) => io.observe(n));
 }
 
-/* ============================== COUNT UP ============================== */
-/* Motivated: the three figures are the credibility claim. Counting draws the
-   eye to them once, on arrival, then stops. */
+/* ============================== COUNT UP ==============================
+   Hierarchy: the three figures are the credibility claim. They count once, on
+   arrival, then stop. */
 
 function setupCountUp() {
   const nums = document.querySelectorAll("[data-to]");
@@ -222,14 +282,17 @@ function setupCountUp() {
       node.textContent = to + suffix;
       return;
     }
-    const dur = 1300;
+    const dur = 1400;
     const t0 = performance.now();
     const step = (now) => {
       const p = Math.min(1, (now - t0) / dur);
-      const eased = 1 - Math.pow(1 - p, 3);
-      node.textContent = Math.round(to * eased) + suffix;
+      node.textContent = Math.round(to * (1 - Math.pow(1 - p, 3))) + suffix;
       if (p < 1) requestAnimationFrame(step);
     };
+    // If rAF never ticks, the number must still end up correct.
+    setTimeout(() => {
+      if (node.textContent === "0") node.textContent = to + suffix;
+    }, 2500);
     requestAnimationFrame(step);
   };
 
@@ -251,8 +314,6 @@ function setupCountUp() {
 }
 
 /* ============================== NAV ============================== */
-/* Motivated: the nav is transparent over the hero image and needs a surface
-   once it sits over content, or the links become unreadable. */
 
 function setupNav() {
   const nav = document.getElementById("nav");
@@ -260,14 +321,13 @@ function setupNav() {
   const burger = document.getElementById("burger");
   const sheet = document.getElementById("sheet");
 
-  // A 1px sentinel just under the nav: once it scrolls out of view the nav is
-  // sitting over content rather than over the top of the hero, so it needs a surface.
+  // A 1px sentinel under the nav. Once it scrolls away the nav sits over
+  // content rather than over the top of the hero, so it needs a surface.
   if (hero && "IntersectionObserver" in window) {
     const sentinel = document.createElement("div");
-    sentinel.style.cssText = "position:absolute;top:80px;left:0;width:1px;height:1px;pointer-events:none;";
+    sentinel.style.cssText = "position:absolute;top:84px;left:0;width:1px;height:1px;pointer-events:none;";
     hero.appendChild(sentinel);
-    const io = new IntersectionObserver(([e]) => nav.classList.toggle("solid", !e.isIntersecting), { threshold: 0 });
-    io.observe(sentinel);
+    new IntersectionObserver(([e]) => nav.classList.toggle("solid", !e.isIntersecting), { threshold: 0 }).observe(sentinel);
   } else {
     nav.classList.add("solid");
   }
@@ -283,7 +343,6 @@ function setupNav() {
   });
   sheet.querySelectorAll("a").forEach((a) => a.addEventListener("click", closeSheet));
 
-  // Mark the section currently in view
   const links = [...document.querySelectorAll(".nav-links a")];
   const targets = links.map((a) => document.querySelector(a.getAttribute("href"))).filter(Boolean);
   if (targets.length && "IntersectionObserver" in window) {
@@ -300,10 +359,22 @@ function setupNav() {
   }
 }
 
-/* ============================== WORK: PINNED STACK ============================== */
-/* Every build gets the whole viewport. Scrolling scales the current one back and
-   dims it while the next rises over it, so the set reads as one continuous reel
-   instead of a wall of thumbnails. */
+/* ============================== TICKER ==============================
+   The single marquee on the page. It states the service in the accent colour,
+   edge to edge, so there is one hard break between the hero and the work. */
+
+const TICKER = ["Terrain", "Interiors", "Lighting", "Set dressing", "Optimization", "Full maps"];
+
+function renderTicker() {
+  const mount = document.getElementById("tickerMount");
+  if (!mount) return;
+  const run = TICKER.map((t) => `<span>${esc(t)}</span><b></b>`).join("");
+  mount.innerHTML = run + run; // duplicated once so the -50% keyframe loops seamlessly
+}
+
+/* ============================== WORK: THE REEL ==============================
+   Six lead builds, each holding the viewport and handing off to the next. The
+   ambient layer takes its colour from whichever one is in front. */
 
 const FEATURED_COUNT = 6;
 
@@ -313,7 +384,8 @@ function renderWork() {
   PROJECTS.slice(0, FEATURED_COUNT).forEach((p, i) => {
     mount.appendChild(
       el(`
-      <div class="panel" data-panel="${i}">
+      <div class="panel" data-panel="${i}" data-a1="${p.amb[0]}" data-a2="${p.amb[1]}">
+        <span class="panel-n" aria-hidden="true">${i + 1}</span>
         <article class="slab">
           <div class="slab-media">
             <img src="${p.images[0]}" alt="${esc(p.name)}" loading="${i < 2 ? "eager" : "lazy"}" width="1600" height="800" />
@@ -333,6 +405,14 @@ function renderWork() {
     );
   });
 
+  // The rail on the right: where you are, and what is still coming.
+  const rail = document.querySelector("#reelRail ol");
+  if (rail) {
+    rail.innerHTML = PROJECTS.slice(0, FEATURED_COUNT)
+      .map((p) => `<li><b>${esc(p.name)}</b><i></i></li>`)
+      .join("");
+  }
+
   mount.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-i]");
     if (btn) openProject(Number(btn.dataset.i));
@@ -340,8 +420,8 @@ function renderWork() {
 }
 
 /* ============================== INDEX: HORIZONTAL PAN ==============================
-   The remaining builds. A different layout family from the stack, and it shows
-   the breadth of the back catalogue in one screen instead of six more. */
+   The back catalogue. A different layout family from the reel, and it shows the
+   breadth in one screen instead of six more. */
 
 function renderIndex() {
   const mount = document.getElementById("indexMount");
@@ -361,7 +441,7 @@ function renderIndex() {
           <h3>${esc(p.name)}</h3>
           ${tagsHTML(p.tags)}
         </div>
-        <button class="sr" type="button" data-i="${i}">Open project: ${esc(p.name)}</button>
+        <button class="sr" type="button">Open project: ${esc(p.name)}</button>
       </article>
     `)
     );
@@ -373,55 +453,34 @@ function renderIndex() {
   });
 }
 
-/* ============================== CRAFT ============================== */
+/* ============================== CRAFT ==============================
+   The heading and the headline number hold in place on the left while the
+   answers scroll past on the right. The 60 FPS figure moved into the sticky
+   column, so this list is four real answers with no filler tile. */
 
 function renderCraft() {
   const mount = document.getElementById("craftMount");
-  CRAFT.forEach((c) => {
-    if (c.kind === "image") {
-      mount.appendChild(
-        el(`
-        <div class="cell tall rv">
-          <div class="cell-img"><img src="${c.img}" alt="" loading="lazy" /></div>
-          <div class="cell-body">
-            <h3>${esc(c.title)}</h3>
-            <p>${esc(c.body)}</p>
-          </div>
-        </div>
-      `)
-      );
-    } else if (c.kind === "figure") {
-      mount.appendChild(
-        el(`
-        <div class="cell span4 rv">
-          <span class="cell-n">${esc(c.n)}${esc(c.suffix)}</span>
-          <h3>${esc(c.title)}</h3>
-          <p>${esc(c.body)}</p>
-        </div>
-      `)
-      );
-    } else {
-      mount.appendChild(
-        el(`
-        <div class="cell ${c.kind === "accent" ? "span6 accent" : "span2"} rv">
-          <h3>${esc(c.title)}</h3>
-          <p>${esc(c.body)}</p>
-        </div>
-      `)
-      );
-    }
+  CRAFT.filter((c) => c.kind !== "figure").forEach((c) => {
+    mount.appendChild(
+      el(`
+      <div class="craft-item rv">
+        <h3>${esc(c.title)}</h3>
+        <p>${esc(c.body)}</p>
+        ${c.img ? `<div class="craft-shot"><img src="${c.img}" alt="" loading="lazy" width="960" height="540" /></div>` : ""}
+      </div>
+    `)
+    );
   });
 }
 
-/* ============================== REVIEWS ============================== */
-/* Motivated: breadth over depth. Eight short quotes read better moving than
-   stacked in a list nobody finishes. Pauses on hover, stops under
-   prefers-reduced-motion (handled in CSS). */
+/* ============================== REVIEWS ==============================
+   Offset columns rather than a second marquee. One marquee per page, and the
+   ticker already spent it. */
 
 function renderReviews() {
-  const track = document.getElementById("voicesMount");
+  const mount = document.getElementById("voicesMount");
   const card = (r) => `
-    <figure class="quote">
+    <figure class="quote" style="margin:0">
       <div class="stars" aria-label="${r.rating} out of 5">${[1, 2, 3, 4, 5].map((n) => I_STAR(n <= r.rating)).join("")}</div>
       <p>${esc(r.quote)}</p>
       <figcaption class="quote-by">
@@ -432,8 +491,10 @@ function renderReviews() {
         </span>
       </figcaption>
     </figure>`;
-  // duplicated once so the -50% keyframe loops seamlessly
-  track.innerHTML = REVIEWS.map(card).join("") + REVIEWS.map(card).join("");
+
+  const cols = [[], [], []];
+  REVIEWS.forEach((r, i) => cols[i % 3].push(card(r)));
+  mount.innerHTML = cols.map((c) => `<div>${c.join("")}</div>`).join("");
 }
 
 /* ============================== TOOLS ============================== */
@@ -441,8 +502,7 @@ function renderReviews() {
 function renderTools() {
   const mount = document.getElementById("toolsMount");
   mount.innerHTML = TOOLS.map(
-    (t) =>
-      `<span class="tool"><img src="${t.src}" alt="" loading="lazy" width="19" height="19" onerror="this.remove()" />${esc(t.label)}</span>`
+    (t) => `<span class="tool"><img src="${t.src}" alt="" loading="lazy" width="19" height="19" onerror="this.remove()" />${esc(t.label)}</span>`
   ).join("");
 }
 
@@ -455,8 +515,8 @@ function renderScope() {
   ).join("");
 }
 
-/* ============================== DISCORD CARD MARKUP ============================== */
-/* The ids below are what renderDiscordPresence() writes into. Keep them. */
+/* ============================== DISCORD CARD MARKUP ==============================
+   The ids below are what renderDiscordPresence() writes into. Keep them. */
 
 function renderDiscordShell() {
   document.getElementById("discordMount").innerHTML = `
@@ -489,13 +549,10 @@ function renderDiscordShell() {
         </div>
       </div>
       <div class="dc-foot">
-        <a class="btn btn-accent" href="${DISCORD_URL}" target="_blank" rel="noreferrer">${I_CHAT} Start a project</a>
+        <a class="btn btn-accent" href="${DISCORD_URL}" target="_blank" rel="noreferrer" data-magnetic>${I_CHAT} Start a project</a>
       </div>
     </div>`;
 }
-
-/* ============================== PROJECT DETAIL ============================== */
-
 let detailNode = null;
 let lastFocus = null;
 
@@ -903,15 +960,10 @@ function setupDiscordCard() {
   connect();
 }
 
-/* ============================== MOTION LAYER (GSAP ScrollTrigger) ============================== */
-/* Everything here is gated on prefers-reduced-motion and on GSAP actually
-   having loaded. If the CDN is blocked the page still renders and works,
-   it just sits still. */
-
 /* ============================== INTRO CURTAIN ==============================
-   Storytelling: the headline number lands before the first build does, so the
-   page opens on the claim rather than on a nav bar. Runs once per session, is
-   under a second, and never depends on GSAP loading. */
+   The wordmark holds while a counter runs, then the whole panel lifts off the
+   top of the hero. Once per session, under a second, and it never depends on
+   GSAP loading. */
 
 function setupBoot() {
   const boot = document.getElementById("boot");
@@ -921,73 +973,107 @@ function setupBoot() {
   let seen = false;
   try { seen = sessionStorage.getItem("booted") === "1"; } catch (e) { /* private mode */ }
 
-  const drop = () => { boot.remove(); document.documentElement.classList.remove("no-scroll"); };
+  const drop = () => {
+    boot.remove();
+    document.documentElement.classList.remove("no-scroll");
+  };
   if (reduce || seen) { drop(); return; }
-
   try { sessionStorage.setItem("booted", "1"); } catch (e) { /* ignore */ }
 
   const n = document.getElementById("bootN");
   const bar = document.getElementById("bootBar");
-  const TO = 50;
-  const DUR = 820;
   document.documentElement.classList.add("no-scroll");
 
-  // Safety net: if rAF never ticks (a background tab, a throttled renderer)
-  // the curtain must not be what stands between a visitor and the site.
+  // Safety net: if rAF never ticks, the curtain must not be what stands
+  // between a visitor and the site.
   const bail = setTimeout(drop, 2600);
 
+  const DUR = 900;
   const t0 = performance.now();
   const tick = (now) => {
     const p = Math.min(1, (now - t0) / DUR);
     const eased = 1 - Math.pow(1 - p, 3);
-    const v = String(Math.round(TO * eased)).padStart(2, "0");
-    n.innerHTML = `${v[0]}<i>${v[1]}</i>`;
+    n.textContent = String(Math.round(100 * eased)).padStart(3, "0");
     bar.style.width = `${p * 100}%`;
     if (p < 1) { requestAnimationFrame(tick); return; }
     clearTimeout(bail);
-    // Curtain lifts off the top of the hero rather than fading, so the first
-    // build is revealed rather than cross-dissolved into.
-    boot.style.transition = "transform .75s cubic-bezier(.76,0,.24,1)";
+    boot.style.transition = "transform .8s cubic-bezier(.76,0,.24,1)";
     boot.style.transform = "translateY(-101%)";
     document.documentElement.classList.remove("no-scroll");
-    setTimeout(drop, 800);
+    setTimeout(drop, 850);
   };
   requestAnimationFrame(tick);
 }
 
+/* ============================== AMBIENT LIGHT ==============================
+   The two blurred fields behind the page take their colour from whichever build
+   is in front of you. This is the reason the page never reads as a flat black
+   field, and it costs one custom property write per section, not per frame. */
+
+function setAmbient(a1, a2) {
+  const root = document.documentElement;
+  if (root.style.getPropertyValue("--a1") === a1) return;
+  root.style.setProperty("--a1", a1);
+  root.style.setProperty("--a2", a2);
+}
+
+function setupAmbient() {
+  if (!("IntersectionObserver" in window)) return;
+
+  // Panels carry their own palette. Everything else falls back to the neutral
+  // pair, so the colour only ever comes from the work.
+  const zones = [...document.querySelectorAll("[data-a1]")];
+  const NEUTRAL = ["#2f3566", "#3a2350"];
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      // The panel covering the middle of the viewport wins.
+      const hit = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (hit) setAmbient(hit.target.dataset.a1, hit.target.dataset.a2);
+    },
+    { rootMargin: "-42% 0px -42% 0px", threshold: [0, 0.5, 1] }
+  );
+  zones.forEach((z) => io.observe(z));
+
+  // Leaving the reel in either direction returns the page to neutral.
+  const reel = document.querySelector(".reel");
+  if (reel) {
+    new IntersectionObserver(
+      ([e]) => { if (!e.isIntersecting) setAmbient(NEUTRAL[0], NEUTRAL[1]); },
+      { threshold: 0 }
+    ).observe(reel);
+  }
+}
+
 /* ============================== POINTER PHYSICS ==============================
-   Feedback only, and only where a click is the point: the two hero CTAs and the
-   contact button pull toward the cursor, cards light up under it. Transform and
-   a CSS custom property, both off the React-less render path, both rAF-gated. */
+   Feedback only, and only where a click is the point: the CTAs pull toward the
+   cursor, and the slabs light up under it. Transform and one custom property,
+   both rAF gated, both desktop pointers only. */
 
 function setupPointer() {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduce || !window.matchMedia("(pointer: fine)").matches) return;
 
-  // Magnetic buttons
   document.querySelectorAll("[data-magnetic]").forEach((btn) => {
     let raf = 0;
-    const move = (e) => {
+    btn.addEventListener("pointermove", (e) => {
       if (raf) return;
       raf = requestAnimationFrame(() => {
         raf = 0;
         const r = btn.getBoundingClientRect();
-        const dx = (e.clientX - (r.left + r.width / 2)) * 0.28;
-        const dy = (e.clientY - (r.top + r.height / 2)) * 0.34;
+        const dx = (e.clientX - (r.left + r.width / 2)) * 0.26;
+        const dy = (e.clientY - (r.top + r.height / 2)) * 0.32;
         btn.style.transform = `translate(${dx}px, ${dy}px)`;
       });
-    };
-    const reset = () => {
+    });
+    btn.addEventListener("pointerleave", () => {
       if (raf) { cancelAnimationFrame(raf); raf = 0; }
       btn.style.transition = "transform .5s cubic-bezier(.22,1,.36,1)";
       btn.style.transform = "";
       setTimeout(() => (btn.style.transition = ""), 500);
-    };
-    btn.addEventListener("pointermove", move);
-    btn.addEventListener("pointerleave", reset);
+    });
   });
 
-  // Cursor spotlight on the featured slabs
   document.querySelectorAll(".slab").forEach((slab) => {
     let raf = 0;
     slab.addEventListener("pointermove", (e) => {
@@ -1002,18 +1088,19 @@ function setupPointer() {
   });
 }
 
+/* ============================== MOTION ==============================
+   GSAP owns pin, scrub and parallax, and nothing else. Every entrance on this
+   page belongs to CSS, so the two systems can never fight over a property. */
+
 function setupMotion() {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const hasGSAP = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
 
   if (reduce || !hasGSAP) {
-    // Static fallback: put the masked headline lines back where they belong,
-    // draw the rules in place, and make the pan row reachable by hand, since
-    // nothing is going to scrub it sideways.
-    document.querySelectorAll(".ln > span").forEach((s) => (s.style.transform = "none"));
-    document.querySelectorAll(".rule").forEach((r) => (r.style.transform = "none"));
+    // Without GSAP the pan cannot be scrubbed sideways, so it has to be
+    // reachable by hand. Everything else still reveals on its own.
     const panEl = document.querySelector(".pan");
-    if (panEl) {
+    if (panEl && !reduce) {
       panEl.style.overflowX = "auto";
       panEl.style.scrollSnapType = "x proximity";
       document.querySelectorAll(".card").forEach((c) => (c.style.scrollSnapAlign = "center"));
@@ -1022,161 +1109,75 @@ function setupMotion() {
   }
 
   gsap.registerPlugin(ScrollTrigger);
-  const EASE = "power3.out";
 
-  /* -- Hero entrance. Storytelling: the name lands, then the supporting copy. -- */
-  const intro = gsap.timeline({ defaults: { ease: EASE } });
-  intro
-    .to(".hero-media img", { scale: 1, duration: 2.2, ease: "power2.out" }, 0)
-    .to("#heroH1 .ln > span", { y: "0%", duration: 1.15, stagger: 0.09 }, 0.15)
-    .from(".hero-sub", { y: 22, opacity: 0, duration: 0.9 }, 0.62)
-    .from(".hero-ctas > *", { y: 18, opacity: 0, duration: 0.75, stagger: 0.08 }, 0.75);
-
-  /* -- Hero parallax. Hierarchy: the copy leaves before the image does, so the
-        build stays on screen as the reader moves down into the work. -- */
+  /* -- Hero. The copy leaves before the image does, so the build stays on
+        screen as the reader moves down into the work. -- */
   gsap.to(".hero-media img", {
-    yPercent: 14,
-    scale: 1.12,
+    scale: 1,
+    duration: 2.4,
+    ease: "power2.out",
+  });
+  gsap.to(".hero-media img", {
+    yPercent: 12,
+    scale: 1.14,
     ease: "none",
     scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
   });
   gsap.to(".hero-in", {
-    yPercent: -18,
+    yPercent: -16,
     opacity: 0,
     ease: "none",
-    scrollTrigger: { trigger: ".hero", start: "top top", end: "70% top", scrub: true },
+    scrollTrigger: { trigger: ".hero", start: "top top", end: "72% top", scrub: true },
   });
 
-  /* -- Section headings: line masks lift as the heading arrives. -- */
-  document.querySelectorAll(".sec-head h2").forEach((h2) => {
-    if (h2.querySelector(".ln")) return;
-    const text = h2.innerHTML;
-    h2.innerHTML = `<span class="ln"><span>${text}</span></span>`;
-    gsap.to(h2.querySelector(".ln > span"), {
-      y: "0%",
-      duration: 1,
-      ease: EASE,
-      scrollTrigger: { trigger: h2, start: "top 88%" },
-    });
-  });
-
-  /* -- THE STACK. Each panel scales back and dims, driven by the arrival of the
-        next panel, so one build hands off to the next. -- */
+  /* -- THE REEL. Each build scales back and dims as the next rises over it, so
+        six panels read as one continuous handoff rather than six pages. -- */
   const panels = gsap.utils.toArray(".panel");
   panels.forEach((panel, i) => {
     const img = panel.querySelector(".slab-media img");
+    const num = panel.querySelector(".panel-n");
 
-    // Maximize: the incoming build settles from slightly over-scaled to rest.
     gsap.fromTo(
       img,
-      { scale: 1.22 },
-      {
-        scale: 1,
-        ease: "none",
-        scrollTrigger: { trigger: panel, start: "top bottom", end: "top top", scrub: true },
-      }
+      { scale: 1.2 },
+      { scale: 1, ease: "none", scrollTrigger: { trigger: panel, start: "top bottom", end: "top top", scrub: true } }
     );
-
-    // Minimize: pushed back and dimmed as the next panel covers it.
+    // the ghost numeral drifts against the slab, which gives the panel depth
+    if (num) {
+      gsap.fromTo(
+        num,
+        { yPercent: 14 },
+        { yPercent: -14, ease: "none", scrollTrigger: { trigger: panel, start: "top bottom", end: "bottom top", scrub: true } }
+      );
+    }
     if (i < panels.length - 1) {
       gsap.to(panel, {
         scale: 0.9,
-        opacity: 0.25,
+        opacity: 0.22,
         ease: "none",
-        scrollTrigger: {
-          trigger: panels[i + 1],
-          start: "top bottom",
-          end: "top top",
-          scrub: true,
-        },
+        scrollTrigger: { trigger: panels[i + 1], start: "top bottom", end: "top top", scrub: true },
       });
     }
   });
 
-  /* -- Stack counter. Feedback: tells you where you are in a ten-panel reel. -- */
-  const hud = document.getElementById("stackHud");
-  if (hud && panels.length) {
-    const cur = hud.querySelector(".cur");
-    const bar = hud.querySelector(".stack-bar i");
-    hud.querySelector(".tot").textContent = `/ ${String(panels.length).padStart(2, "0")}`;
-
+  /* -- The rail. Feedback: which build is in front, and what is still to come. -- */
+  const rail = document.getElementById("reelRail");
+  const railItems = rail ? [...rail.querySelectorAll("li")] : [];
+  if (rail && panels.length) {
     ScrollTrigger.create({
       trigger: "#work",
       start: "top top",
       end: "bottom bottom",
-      onToggle: (self) => hud.classList.toggle("on", self.isActive),
+      onToggle: (self) => rail.classList.toggle("on", self.isActive),
       onUpdate: (self) => {
-        const n = Math.min(panels.length, Math.floor(self.progress * panels.length) + 1);
-        cur.textContent = String(n).padStart(2, "0");
-        bar.style.width = `${self.progress * 100}%`;
+        const n = Math.min(panels.length - 1, Math.floor(self.progress * panels.length));
+        railItems.forEach((li, i) => li.classList.toggle("on", i === n));
       },
     });
   }
 
-  /* -- Craft bento: cells lift in sequence so the grid assembles itself. -- */
-  gsap.from(".bento .cell", {
-    y: 46,
-    opacity: 0,
-    duration: 0.9,
-    ease: EASE,
-    stagger: 0.07,
-    scrollTrigger: { trigger: ".bento", start: "top 82%" },
-  });
-  const bentoImg = document.querySelector(".cell.tall .cell-img img");
-  if (bentoImg) {
-    gsap.fromTo(
-      bentoImg,
-      { scale: 1.3 },
-      { scale: 1, ease: "none", scrollTrigger: { trigger: ".bento", start: "top bottom", end: "bottom top", scrub: true } }
-    );
-  }
-
-  /* -- Marquee skew. Feedback: the row leans into the direction you are
-        scrolling, then settles. Cheap, and it makes the section feel alive. -- */
-  const track = document.getElementById("voicesMount");
-  if (track) {
-    const setSkew = gsap.quickTo(track, "skewX", { duration: 0.5, ease: "power3" });
-    const setScale = gsap.quickTo(track, "scaleY", { duration: 0.5, ease: "power3" });
-    ScrollTrigger.create({
-      trigger: ".voices",
-      start: "top bottom",
-      end: "bottom top",
-      onUpdate: (self) => {
-        const v = gsap.utils.clamp(-9, 9, self.getVelocity() / 260);
-        setSkew(v);
-        setScale(1 + Math.abs(v) / 220);
-      },
-    });
-  }
-
-  /* -- Scope rows and tool pills. -- */
-  gsap.from(".scope-row", {
-    y: 24, opacity: 0, duration: 0.7, ease: EASE, stagger: 0.08,
-    scrollTrigger: { trigger: ".scope", start: "top 86%" },
-  });
-  gsap.from(".tool", {
-    y: 16, opacity: 0, duration: 0.6, ease: EASE, stagger: 0.05,
-    scrollTrigger: { trigger: ".tools", start: "top 90%" },
-  });
-  gsap.from("#discordMount .dc", {
-    y: 40, opacity: 0, duration: 1, ease: EASE,
-    scrollTrigger: { trigger: "#start", start: "top 72%" },
-  });
-
-  /* -- Accent rules draw themselves across as each section header lands.
-        Hierarchy: it marks where a new part of the page begins. -- */
-  gsap.utils.toArray(".rule").forEach((r) => {
-    gsap.to(r, {
-      scaleX: 1,
-      duration: 1.1,
-      ease: "power4.out",
-      scrollTrigger: { trigger: r, start: "top 92%" },
-    });
-  });
-
-  /* -- THE INDEX PAN. Vertical scroll drives the track sideways. Storytelling:
-        after six full-screen builds, the back catalogue reads as one sweep
-        rather than six more screens of scrolling. -- */
+  /* -- THE INDEX PAN. Vertical scroll drives the track sideways, so the back
+        catalogue is one sweep instead of six more screens. -- */
   const pan = document.querySelector(".pan");
   const panTrack = document.getElementById("indexMount");
   if (pan && panTrack) {
@@ -1193,9 +1194,8 @@ function setupMotion() {
         invalidateOnRefresh: true,
       },
     });
-
-    // Each card's image drifts against the track, so the row has depth instead
-    // of sliding as one flat plane.
+    // each card's image drifts against the track, so the row has depth rather
+    // than sliding as one flat plane
     gsap.utils.toArray(".card-media img").forEach((img) => {
       gsap.fromTo(
         img,
@@ -1215,14 +1215,30 @@ function setupMotion() {
     });
   }
 
+  /* -- The ticker leans into the direction you are scrolling, then settles.
+        Cheap, and it makes the band read as a moving part of the page. -- */
+  const ticker = document.getElementById("tickerMount");
+  if (ticker) {
+    const setSkew = gsap.quickTo(ticker, "skewX", { duration: 0.5, ease: "power3" });
+    ScrollTrigger.create({
+      trigger: ".ticker",
+      start: "top bottom",
+      end: "bottom top",
+      onUpdate: (self) => setSkew(gsap.utils.clamp(-8, 8, self.getVelocity() / 280)),
+    });
+  }
+
   // Images finish loading after ScrollTrigger measures, which shifts every
-  // start/end. Recalculate once everything has settled.
+  // start and end. Recalculate once everything has settled.
   window.addEventListener("load", () => ScrollTrigger.refresh());
 }
+
 /* ============================== INIT ============================== */
 
 document.addEventListener("DOMContentLoaded", () => {
   setupBoot();
+
+  renderTicker();
   renderWork();
   renderIndex();
   renderCraft();
@@ -1234,6 +1250,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupNav();
   setupReveal();
   setupCountUp();
+  setupAmbient();
   setupKeys();
   setupDiscordCard();
   setupMotion();
