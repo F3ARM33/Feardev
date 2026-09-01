@@ -112,6 +112,19 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
   background:radial-gradient(125% 95% at 50% 18%, rgba(10,10,13,.24), rgba(10,10,13,.66) 58%, rgba(10,10,13,.88));
 }
 
+/* ============================== LAYER 2: BLUEPRINT ==============================
+   The page is measured, not just decorated. On top of the column grid sits a
+   construction drawing: a setting out circle, its centre mark, the section
+   rules and two corner registration marks. Fixed, so the whole document is
+   drawn against one instrument. */
+.blueprint{
+  position:fixed; inset:0; z-index:-1; width:100%; height:100%;
+  pointer-events:none; overflow:visible;
+  stroke:rgba(255,255,255,.09); stroke-width:1; fill:none; vector-effect:non-scaling-stroke;
+}
+.blueprint circle{ stroke:rgba(255,255,255,.06); }
+@media (max-width:820px){ .blueprint{ display:none; } }
+
 /* ============================== LAYER 2: GRID ==============================
    The spine. Twelve hairlines the full height of the page, so every section is
    measured against the same structure and the breaks out of it read as choices. */
@@ -130,23 +143,33 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* ============================== INTRO CURTAIN ============================== */
+/* ============================== INTRO CURTAIN ==============================
+   A construction drawing that draws itself, then the line resolves out of
+   scrambled characters and the whole panel lifts. It is the same instrument the
+   rest of the page is measured against, so the intro states the idea rather
+   than just filling a second. */
 .boot{
   position:fixed; inset:0; z-index:100; background:var(--bg);
-  display:grid; grid-template-rows:1fr auto; padding:0 var(--gut) clamp(26px,6vh,54px);
+  display:grid; place-items:center; padding:var(--gut);
 }
-.boot-mark{ align-self:center; justify-self:start; display:flex; align-items:center; gap:clamp(16px,2.4vw,34px); }
-.boot-glyph{ height:clamp(3rem,11vw,9rem); width:auto; display:block; }
-.boot-mark b{
-  display:block; font-family:var(--disp); font-weight:800;
-  font-size:clamp(3.4rem,13vw,11rem); letter-spacing:-.06em; line-height:.86;
+.boot-draw{
+  width:min(84vmin,660px); height:auto; fill:none;
+  stroke:rgba(255,255,255,.34); stroke-width:1; vector-effect:non-scaling-stroke;
 }
-.boot-mark b i{ font-style:normal; color:var(--accent); }
-.boot-row{ display:flex; justify-content:space-between; align-items:flex-end; gap:20px; }
-.boot-l{ font-family:var(--mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--text-faint); }
-.boot-n{ font-family:var(--mono); font-size:11px; letter-spacing:.2em; color:var(--accent); font-variant-numeric:tabular-nums; }
+.boot-draw *{ stroke-dasharray:var(--len); stroke-dashoffset:var(--len); }
+.boot-draw .key{ stroke:var(--accent); stroke-width:1.5; }
+.boot-draw .faint{ stroke:rgba(255,255,255,.16); }
+.boot-foot{
+  position:absolute; left:var(--gut); right:var(--gut); bottom:clamp(26px,6vh,54px);
+  display:flex; justify-content:space-between; align-items:flex-end; gap:20px;
+}
+.boot-l{ font-family:var(--mono); font-size:clamp(10px,1.1vw,12px); letter-spacing:.24em; text-transform:uppercase; color:var(--text-dim); }
+.boot-n{ font-family:var(--mono); font-size:clamp(10px,1.1vw,12px); letter-spacing:.2em; color:var(--accent); font-variant-numeric:tabular-nums; }
 .boot-bar{ position:absolute; left:0; bottom:0; height:2px; width:0%; background:var(--accent); }
 @media (prefers-reduced-motion: reduce){ .boot{ display:none !important; } }
+
+/* scrambling text holds its own width, so nothing around it jumps as it lands */
+.scramble{ white-space:pre; }
 
 /* ============================== REVEAL (CSS owns this, alone) ============================== */
 .rv{ opacity:0; transform:translateY(22px); transition:opacity .85s var(--ease), transform .85s var(--ease); }
@@ -373,14 +396,22 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
 }
 .reel-rail.on{ opacity:1; }
 .reel-rail ol{ margin:0; padding:0; display:flex; flex-direction:column; gap:11px; }
-.reel-rail li{ display:flex; align-items:center; justify-content:flex-end; gap:12px; list-style:none; }
-.reel-rail b{
-  font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; color:var(--text-faint); font-weight:500;
-  white-space:nowrap; opacity:0; translate:8px 0;
-  transition:opacity .4s var(--ease), translate .4s var(--ease), color .4s;
+.reel-rail li{ display:flex; align-items:center; justify-content:flex-end; gap:14px; list-style:none; }
+.rail-meta{
+  display:block; text-align:right; white-space:nowrap;
+  opacity:0; translate:10px 0; transition:opacity .45s var(--ease), translate .45s var(--ease);
+}
+.rail-meta em{
+  font-style:normal; font-family:var(--mono); font-size:10px; letter-spacing:.16em;
+  color:var(--accent); margin-right:8px;
+}
+.rail-meta{ font-family:var(--font); font-size:12.5px; font-weight:500; color:var(--text); }
+.rail-meta u{
+  display:block; text-decoration:none; font-family:var(--mono); font-size:9.5px;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--text-faint); margin-top:3px;
 }
 .reel-rail i{ display:block; width:26px; height:2px; background:rgba(255,255,255,.22); transition:background .4s var(--ease), width .4s var(--ease); }
-.reel-rail li.on b{ opacity:1; translate:0 0; color:var(--accent); }
+.reel-rail li.on .rail-meta{ opacity:1; translate:0 0; }
 .reel-rail li.on i{ background:var(--accent); width:44px; }
 @media (max-width:1180px){ .reel-rail{ display:none; } }
 
@@ -405,6 +436,20 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
     linear-gradient(180deg, #0b0b0f, #14141a 42%, #0b0b0f);
 }
 /* the word sits behind the row and drifts against it */
+/* the ruled field is laid in perspective, so the shelf reads as a room the
+   cards travel through rather than a flat panel behind them */
+.pan::before{
+  content:''; position:absolute; inset:-30% -10% -10%; z-index:0; pointer-events:none;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 88px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 88px);
+  transform:perspective(760px) rotateX(56deg) scale(1.5);
+  transform-origin:50% 0;
+  -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,.85), transparent 62%);
+  mask-image:linear-gradient(to bottom, rgba(0,0,0,.85), transparent 62%);
+}
+@media (prefers-reduced-motion: reduce){ .pan::before{ display:none; } }
+
 .pan-word{
   position:absolute; left:0; top:50%; translate:0 -50%; z-index:0; white-space:nowrap;
   font-family:var(--disp); font-weight:800; font-size:clamp(9rem,24vw,20rem); line-height:.8;

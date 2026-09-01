@@ -428,7 +428,13 @@ function renderWork() {
   const rail = document.querySelector("#reelRail ol");
   if (rail) {
     rail.innerHTML = PROJECTS.slice(0, FEATURED_COUNT)
-      .map((p) => `<li><b>${esc(p.name)}</b><i></i></li>`)
+      .map(
+        (p, n) =>
+          `<li>
+            <span class="rail-meta"><em>${String(n + 1).padStart(2, "0")}</em>${esc(p.name)}<u>${esc(p.year)} / ${p.count} shots</u></span>
+            <i></i>
+          </li>`
+      )
       .join("");
   }
 
@@ -515,6 +521,24 @@ function renderCraft() {
 
 /* Which step is being read drives the panel. IntersectionObserver only, so it
    costs nothing per frame and degrades to the first shot if it is unavailable. */
+/* Mono labels resolve out of noise as they arrive. Only the mono ones, where a
+   fixed advance width means nothing around them reflows while they land. */
+function setupScramble() {
+  const nodes = [...document.querySelectorAll(".sec-head .mono, .step-k")];
+  if (!nodes.length || !("IntersectionObserver" in window)) return;
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        scramble(e.target, e.target.textContent.trim(), 720);
+        io.unobserve(e.target);
+      });
+    },
+    { threshold: 0.9 }
+  );
+  nodes.forEach((n) => io.observe(n));
+}
+
 function setupCraft() {
   const steps = [...document.querySelectorAll(".step")];
   const shots = [...document.querySelectorAll("#craftMedia img")];
@@ -741,7 +765,7 @@ function openProject(i) {
     </div>`);
 
   document.body.appendChild(detailNode);
-  document.documentElement.classList.add("no-scroll");
+  lockScroll(true);
   requestAnimationFrame(() => detailNode.classList.add("in"));
   detailNode.querySelector("[data-close]").focus();
 
@@ -762,7 +786,7 @@ function closeProject(silent) {
   detailNode.remove();
   detailNode = null;
   if (silent) return;
-  document.documentElement.classList.remove("no-scroll");
+  lockScroll(false);
   if (lastFocus) lastFocus.focus();
 }
 
@@ -1101,10 +1125,95 @@ function setupDiscordCard() {
   connect();
 }
 
+/* ============================== SMOOTH SCROLL ==============================
+   Lenis puts inertia on the page. Everything already pinned or scrubbed reads
+   as weighted rather than snapping frame to frame with the scrollbar, and it is
+   the single biggest reason a site feels considered rather than assembled.
+
+   Two things have to be true for it not to fight the rest of the page: GSAP has
+   to drive the loop, so ScrollTrigger and Lenis agree on the frame, and the
+   native smooth scroll has to be off, or the two ease against each other. */
+
+let lenis = null;
+
+function setupSmoothScroll() {
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce || typeof window.Lenis === "undefined" || typeof window.gsap === "undefined") return;
+
+  document.documentElement.style.scrollBehavior = "auto";
+
+  lenis = new Lenis({
+    duration: 1.05,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    smoothWheel: true,
+    touchMultiplier: 1.6,
+  });
+
+  if (window.ScrollTrigger) lenis.on("scroll", ScrollTrigger.update);
+
+  // One ticker, not two. lagSmoothing off so a slow frame does not make the
+  // scrub jump to catch up.
+  gsap.ticker.add((time) => lenis.raf(time * 1000));
+  gsap.ticker.lagSmoothing(0);
+
+  // In page links have to go through Lenis, or they teleport past the easing.
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const target = document.querySelector(a.getAttribute("href"));
+    if (!target) return;
+    e.preventDefault();
+    lenis.scrollTo(target, { offset: -80 });
+  });
+}
+
+/* The project overlay and the intro both take the page out of play. Lenis has
+   to be told, or the body keeps easing underneath them. */
+function lockScroll(on) {
+  document.documentElement.classList.toggle("no-scroll", on);
+  if (!lenis) return;
+  if (on) lenis.stop();
+  else lenis.start();
+}
+
+/* ============================== SCRAMBLE ==============================
+   Text resolves out of noise one character at a time. Used on the mono lines
+   only, where the fixed advance width means nothing reflows while it lands. */
+
+const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/\\<>*#";
+
+function scramble(node, text, duration = 900) {
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) {
+    node.textContent = text;
+    return;
+  }
+  node.classList.add("scramble");
+  const chars = text.split("");
+  const t0 = performance.now();
+
+  const step = (now) => {
+    const p = Math.min(1, (now - t0) / duration);
+    // each character locks in at its own point across the run, left to right
+    const settled = p * chars.length * 1.25;
+    node.textContent = chars
+      .map((ch, i) => {
+        if (ch === " ") return " ";
+        if (i < settled - 1) return ch;
+        return SCRAMBLE_CHARS[(Math.random() * SCRAMBLE_CHARS.length) | 0];
+      })
+      .join("");
+    if (p < 1) requestAnimationFrame(step);
+    else node.textContent = text;
+  };
+  // If rAF never ticks, the text still has to end up readable.
+  setTimeout(() => (node.textContent = text), duration + 1200);
+  requestAnimationFrame(step);
+}
+
 /* ============================== INTRO CURTAIN ==============================
-   The wordmark holds while a counter runs, then the whole panel lifts off the
-   top of the hero. Once per session, under a second, and it never depends on
-   GSAP loading. */
+   The drawing draws itself, the line resolves, the panel lifts. Once per
+   session, and it never depends on GSAP loading. */
 
 function setupBoot() {
   const boot = document.getElementById("boot");
@@ -1116,32 +1225,53 @@ function setupBoot() {
 
   const drop = () => {
     boot.remove();
-    document.documentElement.classList.remove("no-scroll");
+    lockScroll(false);
   };
   if (reduce || seen) { drop(); return; }
   try { sessionStorage.setItem("booted", "1"); } catch (e) { /* ignore */ }
 
   const n = document.getElementById("bootN");
   const bar = document.getElementById("bootBar");
-  document.documentElement.classList.add("no-scroll");
+  const line = document.getElementById("bootLine");
+  const draw = document.getElementById("bootDraw");
+  lockScroll(true);
 
-  // Safety net: if rAF never ticks, the curtain must not be what stands
-  // between a visitor and the site.
-  const bail = setTimeout(drop, 2600);
+  // Each stroke is dashed by its own length, so it draws rather than fades.
+  if (draw) {
+    [...draw.children].forEach((el, i) => {
+      // A guide line is already dashed. Overwriting its dash to draw it would
+      // turn it solid, so those fade in and only the solid strokes draw.
+      if (el.hasAttribute("stroke-dasharray")) {
+        el.style.opacity = "0";
+        el.style.transition = `opacity .9s ease ${0.5 + i * 0.06}s`;
+        requestAnimationFrame(() => (el.style.opacity = "1"));
+        return;
+      }
+      const len = el.getTotalLength ? el.getTotalLength() : 1000;
+      el.style.setProperty("--len", len);
+      el.style.transition = `stroke-dashoffset 1.15s cubic-bezier(.65,0,.35,1) ${i * 0.075}s`;
+      requestAnimationFrame(() => (el.style.strokeDashoffset = "0"));
+    });
+  }
 
-  const DUR = 900;
+  const text = line ? line.textContent : "";
+  if (line) setTimeout(() => scramble(line, text, 820), 420);
+
+  // Safety net: a throttled renderer must not leave a visitor behind a curtain.
+  const bail = setTimeout(drop, 3400);
+
+  const DUR = 1500;
   const t0 = performance.now();
   const tick = (now) => {
     const p = Math.min(1, (now - t0) / DUR);
-    const eased = 1 - Math.pow(1 - p, 3);
-    n.textContent = String(Math.round(100 * eased)).padStart(3, "0");
+    n.textContent = String(Math.round(100 * p)).padStart(3, "0");
     bar.style.width = `${p * 100}%`;
     if (p < 1) { requestAnimationFrame(tick); return; }
     clearTimeout(bail);
-    boot.style.transition = "transform .8s cubic-bezier(.76,0,.24,1)";
+    boot.style.transition = "transform .85s cubic-bezier(.76,0,.24,1)";
     boot.style.transform = "translateY(-101%)";
-    document.documentElement.classList.remove("no-scroll");
-    setTimeout(drop, 850);
+    lockScroll(false);
+    setTimeout(drop, 900);
   };
   requestAnimationFrame(tick);
 }
@@ -1452,6 +1582,7 @@ function setupMotion() {
 /* ============================== INIT ============================== */
 
 document.addEventListener("DOMContentLoaded", () => {
+  setupSmoothScroll();
   setupBoot();
 
   renderTicker();
@@ -1468,6 +1599,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupCountUp();
   setupAmbient();
   setupCraft();
+  setupScramble();
   setupClock();
   setupKeys();
   setupDiscordCard();
