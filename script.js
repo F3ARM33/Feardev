@@ -606,13 +606,15 @@ function renderReviews() {
   const avg = REVIEWS.reduce((t, r) => t + r.rating, 0) / REVIEWS.length;
   const fives = REVIEWS.filter((r) => r.rating === 5).length;
 
-  // Give every review a build to sit against, cycling the featured set.
-  const beds = PROJECTS.slice(0, FEATURED_COUNT).map((p) => p.images[0]);
+  // One build per review, never repeated. Cycling the six featured ones gave
+  // two cards the same backdrop; there are twelve builds, so spread across all
+  // of them and take a different shot from each set for variety.
+  const beds = PROJECTS.map((p, n) => p.images[Math.min(n % p.count, p.images.length - 1)]);
 
   const cards = REVIEWS.map(
     (r, i) => `
     <article class="cf-card" data-i="${i}" aria-roledescription="slide" aria-label="${i + 1} of ${REVIEWS.length}">
-      <img class="cf-bed" src="${beds[i % beds.length]}" alt="" loading="lazy" />
+      <img class="cf-bed" src="${beds[i]}" alt="" loading="lazy" />
       <span class="cf-veil"></span>
       <div class="cf-body">
         <div class="stars" aria-label="${r.rating} out of 5">${[1, 2, 3, 4, 5].map((n) => I_STAR(n <= r.rating)).join("")}</div>
@@ -848,7 +850,7 @@ function renderDiscordShell() {
         </div>
       </div>
       <div class="dc-foot">
-        <a class="btn btn-accent" href="${DISCORD_URL}" target="_blank" rel="noreferrer" data-magnetic>${I_CHAT} Start a project</a>
+        <span class="dc-handle-out">${I_CHAT} Message me on Discord</span>
       </div>
     </div>`;
 }

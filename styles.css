@@ -974,3 +974,124 @@ body.inverted .edge li.on b{ color:#0a0d02; }
 .craft-item:hover::before{ background:var(--spectrum); }
 .scope-row::before{ background:var(--spectrum); }
 .nav-links a::after{ background:var(--spectrum); }
+
+/* ============================== GLOW CTA ==============================
+   The pill from the reference: a glass body, a conic shimmer travelling around
+   the edge, a lit orb leading it and a sparkle chip closing it, sitting in its
+   own bloom. Everything animated here is transform or opacity. */
+.gbtn{
+  position:relative; z-index:0; isolation:isolate;
+  display:inline-flex; align-items:center; gap:13px;
+  padding:7px 7px 7px 8px; border-radius:var(--r-pill);
+  font-size:14px; font-weight:600; color:var(--text);
+  overflow:hidden; white-space:nowrap;
+  transition:box-shadow .4s var(--ease), color .3s var(--ease);
+  box-shadow:0 10px 40px -12px rgba(120,140,255,.5);
+}
+/* the travelling ring */
+.gbtn::before{
+  content:''; position:absolute; left:50%; top:50%; width:230%; aspect-ratio:1;
+  translate:-50% -50%; z-index:-2; border-radius:50%;
+  background:conic-gradient(from 0deg,
+    transparent 0 52%, var(--c-cyan) 66%, var(--c-lime) 78%, var(--c-mag) 90%, transparent 100%);
+  animation:gspin 4.6s linear infinite;
+}
+/* the body, inset so the ring reads as a 1.5px edge */
+.gbtn::after{
+  content:''; position:absolute; inset:1.5px; z-index:-1; border-radius:inherit;
+  background:linear-gradient(180deg, #1b1b26 0%, #101018 100%);
+}
+@keyframes gspin{ to{ rotate:360deg; } }
+
+.gbtn-label{ padding-inline:2px 4px; }
+
+/* the orb: a lit ring that breathes */
+.gbtn-orb{
+  position:relative; flex:none; width:30px; height:30px; border-radius:50%;
+  background:radial-gradient(circle at 50% 42%, #e9edff 0%, #98a6ff 34%, #2b2f52 62%, #14141c 100%);
+  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5), 0 0 16px rgba(150,166,255,.7);
+  animation:gorb 3.2s var(--ease) infinite;
+}
+.gbtn-orb::after{
+  content:''; position:absolute; inset:6px; border-radius:50%;
+  background:radial-gradient(circle at 50% 40%, rgba(255,255,255,.95), rgba(255,255,255,0) 70%);
+}
+@keyframes gorb{
+  0%,100%{ box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5), 0 0 14px rgba(150,166,255,.6); }
+  50%    { box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.75), 0 0 26px rgba(150,166,255,.95); }
+}
+
+/* the trailing chip */
+.gbtn-chip{
+  flex:none; width:30px; height:30px; border-radius:50%;
+  display:grid; place-items:center; color:var(--text);
+  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12);
+  transition:background .3s var(--ease), color .3s var(--ease), rotate .5s var(--ease);
+}
+.gbtn-chip svg{ width:14px; height:14px; }
+.gbtn:hover{ box-shadow:0 14px 54px -10px rgba(140,160,255,.75); }
+.gbtn:hover .gbtn-chip{ background:var(--accent); color:var(--on-accent); rotate:90deg; }
+.gbtn:active{ scale:.985; }
+.gbtn-lg{ margin-top:26px; font-size:15px; padding:9px 9px 9px 10px; }
+.gbtn-lg .gbtn-orb, .gbtn-lg .gbtn-chip{ width:34px; height:34px; }
+
+@media (prefers-reduced-motion: reduce){
+  .gbtn::before{ animation:none; background:linear-gradient(90deg, var(--c-mag), var(--c-lime), var(--c-cyan)); }
+  .gbtn-orb{ animation:none; }
+}
+
+/* ============================== AURORA ==============================
+   Three slow drifting fields in the spectrum. The reference set on 21st for
+   this is all "animated aurora gradient"; this is the same idea in CSS, so it
+   costs one compositor layer per blob and nothing per frame in JS. */
+.aurora{ position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+.aurora i{
+  position:absolute; display:block; border-radius:50%; filter:blur(90px); opacity:.5;
+  will-change:transform;
+}
+.aurora i:nth-child(1){ width:52vw; height:52vw; left:-10vw; top:-16vw; background:var(--c-mag); animation:drift1 26s ease-in-out infinite; }
+.aurora i:nth-child(2){ width:44vw; height:44vw; right:-8vw; top:8vw;  background:var(--c-cyan); animation:drift2 32s ease-in-out infinite; }
+.aurora i:nth-child(3){ width:38vw; height:38vw; left:32vw; bottom:-18vw; background:var(--c-lime); opacity:.24; animation:drift3 38s ease-in-out infinite; }
+@keyframes drift1{ 0%,100%{ transform:translate3d(0,0,0) scale(1); } 50%{ transform:translate3d(9vw,7vh,0) scale(1.16); } }
+@keyframes drift2{ 0%,100%{ transform:translate3d(0,0,0) scale(1.08); } 50%{ transform:translate3d(-11vw,9vh,0) scale(.92); } }
+@keyframes drift3{ 0%,100%{ transform:translate3d(0,0,0) scale(1); } 50%{ transform:translate3d(7vw,-8vh,0) scale(1.2); } }
+@media (prefers-reduced-motion: reduce){ .aurora i{ animation:none; } }
+
+/* the hero keeps its photograph on top of the aurora */
+.hero .aurora{ z-index:-1; opacity:.55; }
+.hero-media{ z-index:0; }
+
+/* CONTACT: the same lit room the shelf gets, so the last screen is not the
+   flattest one on the page */
+#start{ position:relative; overflow:hidden; isolation:isolate; }
+#start .aurora{ opacity:.38; }
+#start > .wrap{ position:relative; z-index:1; }
+.aurora-warm i:nth-child(1){ background:var(--c-mag); }
+.aurora-warm i:nth-child(2){ background:var(--c-lime); opacity:.3; }
+.aurora-warm i:nth-child(3){ background:var(--c-cyan); opacity:.34; }
+.console{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015)),
+    radial-gradient(90% 70% at 14% 6%, rgba(255,45,155,.1), transparent 60%),
+    radial-gradient(80% 66% at 88% 96%, rgba(45,225,255,.1), transparent 58%) !important;
+}
+
+/* ============================== COVERFLOW, LARGER ============================== */
+.cf{ min-height:clamp(620px,80vh,780px) !important; }
+.cf-stage{ height:clamp(520px,68vh,660px) !important; }
+.cf-card{ width:min(84vw,392px) !important; height:clamp(500px,66vh,630px) !important; }
+.cf-body p{ font-size:clamp(1.15rem,2vw,1.5rem) !important; }
+@media (max-width:700px){
+  .cf-card{ width:min(88vw,320px) !important; }
+  .cf{ min-height:560px !important; }
+  .cf-stage{ height:480px !important; }
+}
+
+/* the closing CTA fills the panel width but keeps its cluster centred */
+.console-side .gbtn-lg{ width:100%; justify-content:center; margin-top:20px; }
+.dc-handle-out{
+  display:flex; align-items:center; justify-content:center; gap:9px;
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--text-faint);
+}
+.dc-handle-out svg{ width:14px; height:14px; }
