@@ -524,7 +524,7 @@ function renderCraft() {
 /* Mono labels resolve out of noise as they arrive. Only the mono ones, where a
    fixed advance width means nothing around them reflows while they land. */
 function setupScramble() {
-  const nodes = [...document.querySelectorAll(".sec-head .mono, .step-k, .vision-in .mono, #fieldTag")];
+  const nodes = [...document.querySelectorAll(".sec-head .mono, .step-k, .vision-in .mono")];
   if (!nodes.length || !("IntersectionObserver" in window)) return;
   const io = new IntersectionObserver(
     (entries) => {
@@ -543,10 +543,11 @@ function setupCraft() {
   const steps = [...document.querySelectorAll(".step")];
   const shots = [...document.querySelectorAll("#craftMedia img")];
   const bar = document.querySelector(".craft-progress i");
-  if (!steps.length || !("IntersectionObserver" in window)) return;
+  if (!steps.length) return;
 
   let active = -1;
   const show = (n) => {
+    n = Math.max(0, Math.min(steps.length - 1, n));
     if (n === active) return;
     active = n;
     shots.forEach((s, i) => s.classList.toggle("on", i === n));
@@ -554,27 +555,49 @@ function setupCraft() {
     if (bar) bar.style.height = `${((n + 1) / steps.length) * 100}%`;
   };
 
-  const io = new IntersectionObserver(
-    (entries) => {
-      const hit = entries
-        .filter((e) => e.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (hit) show(Number(hit.target.dataset.step));
-    },
-    { rootMargin: "-38% 0px -38% 0px", threshold: [0, 0.5, 1] }
-  );
-  steps.forEach((s) => io.observe(s));
-  show(0);
+  // Which step is being read is a function of scroll position, not of whether
+  // an observer band happened to be crossed. The band version got stuck: with
+  // steps taller than the band, there are scroll positions where nothing is
+  // intersecting at all, so no callback fires and the panel keeps the last
+  // shot. Measuring every step against the viewport centre cannot get stuck.
+  const pick = () => {
+    const mid = window.innerHeight * 0.5;
+    let best = 0;
+    let bestDist = Infinity;
+    steps.forEach((st, i) => {
+      const r = st.getBoundingClientRect();
+      const d = Math.abs(r.top + r.height / 2 - mid);
+      if (d < bestDist) { bestDist = d; best = i; }
+    });
+    show(best);
+  };
+
+  if (window.ScrollTrigger) {
+    ScrollTrigger.create({
+      trigger: "#craft",
+      start: "top bottom",
+      end: "bottom top",
+      onUpdate: pick,
+      onRefresh: pick,
+    });
+  } else if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver(pick, { rootMargin: "-45% 0px -45% 0px", threshold: [0, 0.5, 1] });
+    steps.forEach((st) => io.observe(st));
+  }
+  pick();
 }
 
-/* ============================== REVIEWS: THE QUOTE WALL ==============================
-   The quotes are short and wildly uneven in length. In a fixed grid every row
-   takes the height of its tallest card, which is what left all that air between
-   them. The seven supporting quotes now flow in a packed column layout, so each
-   card is only as tall as its own text and the wall closes up. One lead quote in
-   display type carries the section, with the average beside it as a piece of
-   type rather than a badge. The average is computed from the review data, so it
-   cannot drift from what is on the page. */
+
+/* ============================== REVIEWS: COVERFLOW ==============================
+   A 3D coverflow deck. The supplied component is React and shadcn; this site is
+   neither, so this is a port of the mechanics rather than the file: centre card
+   at rest, neighbours rotated and scaled back on Y, far cards dimmed and
+   blurred, arrows, dots, autoplay that pauses on hover, arrow keys, and swipe.
+
+   Each card takes a build as its backdrop so the deck is image led like the
+   reference, and the whole stage is tinted by that build behind a heavy blur. */
+
+const CF = { i: 0, timer: 0, hover: false };
 
 function renderReviews() {
   const mount = document.getElementById("voicesMount");
@@ -583,36 +606,147 @@ function renderReviews() {
   const avg = REVIEWS.reduce((t, r) => t + r.rating, 0) / REVIEWS.length;
   const fives = REVIEWS.filter((r) => r.rating === 5).length;
 
-  const quote = (r, cls) => `
-    <figure class="quote ${cls}">
-      <div>
+  // Give every review a build to sit against, cycling the featured set.
+  const beds = PROJECTS.slice(0, FEATURED_COUNT).map((p) => p.images[0]);
+
+  const cards = REVIEWS.map(
+    (r, i) => `
+    <article class="cf-card" data-i="${i}" aria-roledescription="slide" aria-label="${i + 1} of ${REVIEWS.length}">
+      <img class="cf-bed" src="${beds[i % beds.length]}" alt="" loading="lazy" />
+      <span class="cf-veil"></span>
+      <div class="cf-body">
         <div class="stars" aria-label="${r.rating} out of 5">${[1, 2, 3, 4, 5].map((n) => I_STAR(n <= r.rating)).join("")}</div>
         <p>${esc(r.quote)}</p>
+        <span class="cf-bar"></span>
+        <figcaption class="quote-by">
+          <img src="${r.avatar}" alt="" loading="lazy" width="34" height="34" />
+          <span>
+            <span class="quote-name">${esc(r.name)}</span><br />
+            <span class="quote-role">${esc(r.role)}</span>
+          </span>
+        </figcaption>
       </div>
-      <figcaption class="quote-by">
-        <img src="${r.avatar}" alt="" loading="lazy" width="34" height="34" />
-        <span>
-          <span class="quote-name">${esc(r.name)}</span><br />
-          <span class="quote-role">${esc(r.role)}</span>
-        </span>
-      </figcaption>
-    </figure>`;
-
-  // The longest quote leads, because it is the one that says the most.
-  const rest = [...REVIEWS];
-  const leadIx = rest.reduce((best, r, i) => (r.quote.length > rest[best].quote.length ? i : best), 0);
-  const lead = rest.splice(leadIx, 1)[0];
+    </article>`
+  ).join("");
 
   mount.innerHTML = `
-    <div class="wall-top">
-      <div class="wall-score">
-        <div class="stars" aria-hidden="true">${[1, 2, 3, 4, 5].map(() => I_STAR(true)).join("")}</div>
-        <b>${avg.toFixed(1)}</b>
-        <small>Average rating<br />${fives} of ${REVIEWS.length} at five stars</small>
-      </div>
-      ${quote(lead, "lead")}
+    <div class="cf-score">
+      <div class="stars" aria-hidden="true">${[1, 2, 3, 4, 5].map(() => I_STAR(true)).join("")}</div>
+      <b>${avg.toFixed(1)}</b>
+      <small>Average rating &nbsp;/&nbsp; ${fives} of ${REVIEWS.length} at five stars</small>
     </div>
-    <div class="wall-rest">${rest.map((r) => quote(r, "")).join("")}</div>`;
+    <div class="cf" id="cf">
+      <div class="cf-glow" id="cfGlow"></div>
+      <div class="cf-stage" id="cfStage">${cards}</div>
+      <button class="cf-nav cf-prev" type="button" aria-label="Previous review">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <button class="cf-nav cf-next" type="button" aria-label="Next review">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <div class="cf-dots" id="cfDots" role="tablist" aria-label="Reviews">
+        ${REVIEWS.map((_, i) => `<button type="button" role="tab" data-dot="${i}" aria-label="Review ${i + 1}"></button>`).join("")}
+      </div>
+    </div>`;
+}
+
+function setupCoverflow() {
+  const cf = document.getElementById("cf");
+  const stage = document.getElementById("cfStage");
+  if (!cf || !stage) return;
+
+  const cards = [...stage.querySelectorAll(".cf-card")];
+  const dots = [...cf.querySelectorAll("[data-dot]")];
+  const glow = document.getElementById("cfGlow");
+  const total = cards.length;
+  if (!total) return;
+
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const paint = () => {
+    cards.forEach((card, idx) => {
+      const off = (idx - CF.i + total) % total;
+      let t = "translateX(0) scale(.42) rotateY(0deg)";
+      let o = 0;
+      let z = 0;
+      let f = "brightness(.4) blur(3px)";
+      let centre = false;
+
+      if (off === 0) {
+        centre = true;
+        t = "translateX(0) scale(1) rotateY(0deg)";
+        o = 1; z = 30; f = "none";
+      } else if (off === 1) {
+        t = "translateX(58%) scale(.84) rotateY(-24deg)";
+        o = .62; z = 20; f = "brightness(.7)";
+      } else if (off === 2) {
+        t = "translateX(104%) scale(.68) rotateY(-38deg)";
+        o = .32; z = 10; f = "brightness(.5) blur(1.5px)";
+      } else if (off === total - 1) {
+        t = "translateX(-58%) scale(.84) rotateY(24deg)";
+        o = .62; z = 20; f = "brightness(.7)";
+      } else if (off === total - 2) {
+        t = "translateX(-104%) scale(.68) rotateY(38deg)";
+        o = .32; z = 10; f = "brightness(.5) blur(1.5px)";
+      }
+
+      card.style.transform = t;
+      card.style.opacity = o;
+      card.style.zIndex = z;
+      card.style.filter = f;
+      card.classList.toggle("is-centre", centre);
+      card.setAttribute("aria-hidden", centre ? "false" : "true");
+      card.style.pointerEvents = o > 0 ? "auto" : "none";
+      card.style.cursor = centre ? "default" : "pointer";
+    });
+
+    dots.forEach((d, i) => d.classList.toggle("on", i === CF.i));
+    if (glow) {
+      const bed = cards[CF.i].querySelector(".cf-bed");
+      if (bed) glow.style.backgroundImage = `url("${bed.getAttribute("src")}")`;
+    }
+  };
+
+  const go = (n) => { CF.i = ((n % total) + total) % total; paint(); };
+  const next = () => go(CF.i + 1);
+  const prev = () => go(CF.i - 1);
+
+  cf.querySelector(".cf-next").addEventListener("click", next);
+  cf.querySelector(".cf-prev").addEventListener("click", prev);
+  dots.forEach((d) => d.addEventListener("click", () => go(Number(d.dataset.dot))));
+  cards.forEach((c) => c.addEventListener("click", () => {
+    if (!c.classList.contains("is-centre")) go(Number(c.dataset.i));
+  }));
+
+  // Arrow keys, but only while the deck is the thing you are looking at.
+  // Binding them to the window unconditionally would steal them from the
+  // lightbox, which uses the same keys for its own navigation.
+  let inView = false;
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(([e]) => { inView = e.isIntersecting; }, { threshold: 0.4 }).observe(cf);
+  }
+  window.addEventListener("keydown", (e) => {
+    if (!inView || document.querySelector(".lb") || document.querySelector(".detail")) return;
+    if (e.key === "ArrowRight") next();
+    if (e.key === "ArrowLeft") prev();
+  });
+
+  // Swipe
+  let sx = 0;
+  cf.addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; }, { passive: true });
+  cf.addEventListener("touchend", (e) => {
+    const d = e.changedTouches[0].clientX - sx;
+    if (Math.abs(d) > 45) (d < 0 ? next : prev)();
+  }, { passive: true });
+
+  // Autoplay, paused on hover and off entirely under reduced motion.
+  cf.addEventListener("pointerenter", () => { CF.hover = true; });
+  cf.addEventListener("pointerleave", () => { CF.hover = false; });
+  if (!reduce) {
+    CF.timer = setInterval(() => { if (!CF.hover && inView) next(); }, 5200);
+  }
+
+  paint();
 }
 
 /* ============================== TOOLS ============================== */
@@ -729,7 +863,7 @@ function openProject(i) {
 
   const next = PROJECTS[(i + 1) % PROJECTS.length];
   detailNode = el(`
-    <div class="detail" role="dialog" aria-modal="true" aria-label="${esc(p.name)}">
+    <div class="detail" role="dialog" aria-modal="true" data-lenis-prevent aria-label="${esc(p.name)}">
       <div class="detail-bar">
         <span class="mono">${esc(p.name)}</span>
         <button class="icon-btn" data-close aria-label="Close project">${I_CLOSE}</button>
@@ -747,7 +881,7 @@ function openProject(i) {
         ${p.images
           .map(
             (src, n) =>
-              `<button class="shot" type="button" data-shot="${n}" aria-label="Enlarge image ${n + 1}"><img src="${src}" alt="${esc(p.name)}, image ${n + 1}" loading="${n < 2 ? "eager" : "lazy"}" /></button>`
+              `<button class="shot" type="button" data-shot="${n}" aria-label="Enlarge image ${n + 1}"><img src="${src}" alt="${esc(p.name)}, image ${n + 1}" width="1600" height="900" loading="${n < 3 ? "eager" : "lazy"}" decoding="async" /></button>`
           )
           .join("")}
       </div>
@@ -1811,22 +1945,6 @@ function setupMotion() {
     });
   }
 
-  /* -- The field. One build at full frame, the image drifting behind a fixed
-        frame so the section breathes without moving the type. -- */
-  const fieldImg = document.querySelector(".field-media img");
-  if (fieldImg) {
-    gsap.fromTo(
-      fieldImg,
-      { scale: 1.18, yPercent: -4 },
-      {
-        scale: 1,
-        yPercent: 4,
-        ease: "none",
-        scrollTrigger: { trigger: ".field", start: "top bottom", end: "bottom top", scrub: true },
-      }
-    );
-  }
-
   /* -- The beam in the light section draws across as it arrives. -- */
   gsap.utils.toArray(".vision-beam path").forEach((p, i) => {
     const len = p.getTotalLength ? p.getTotalLength() : 1400;
@@ -1871,9 +1989,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEdge();
   setupInversion();
   setupRadar();
-  const fieldHit = document.querySelector(".field-hit");
-  if (fieldHit) fieldHit.addEventListener("click", () => openProject(Number(fieldHit.dataset.i)));
   setupCraft();
+  setupCoverflow();
   setupScramble();
   setupClock();
   setupKeys();
