@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>OG card source</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Geist+Mono:wght@500&display=swap" />
+<style>
+  *{ box-sizing:border-box; margin:0; }
+  html,body{ background:#17171c; display:grid; place-items:center; height:100%; }
+  /* The card is authored at exactly 1200x630 so the capture needs no guesswork.
+     Rebuild it by loading this file and screenshotting #card. */
+  #card{
+    position:relative; width:1200px; height:630px; overflow:hidden;
+    background:#0a0a0d; color:#f5f5f7; isolation:isolate;
+    font-family:'Bricolage Grotesque', system-ui, sans-serif;
+  }
+  #card img.shot{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.92;
+  }
+  #card .wash{
+    position:absolute; inset:0;
+    background:
+      linear-gradient(to top, #0a0a0d 4%, rgba(10,10,13,.36) 46%, rgba(10,10,13,.06) 100%),
+      linear-gradient(to right, rgba(10,10,13,.88) 0%, rgba(10,10,13,.3) 52%, rgba(10,10,13,0) 82%);
+  }
+  #card .beam{ position:absolute; inset:0; mix-blend-mode:screen; opacity:.8; }
+  #card .in{
+    position:absolute; left:66px; right:66px; bottom:58px; z-index:2;
+    display:flex; align-items:flex-end; justify-content:space-between; gap:40px;
+  }
+  h1{
+    font-weight:800; font-size:82px; line-height:.94; letter-spacing:-.05em; max-width:13ch;
+  }
+  h1 em{ font-style:normal; color:#ccff33; }
+  .mark{ display:flex; align-items:center; gap:14px; margin-bottom:26px; }
+  .mark svg{ height:34px; width:auto; }
+  .mark b{ font-size:30px; font-weight:800; letter-spacing:-.03em; }
+  .meta{
+    font-family:'Geist Mono', monospace; font-size:15px; letter-spacing:.18em;
+    text-transform:uppercase; color:#a3a3ad; text-align:right; white-space:nowrap; line-height:2;
+  }
+  .meta span{ color:#ccff33; }
+  .rule{
+    position:absolute; left:0; right:0; bottom:0; height:5px; z-index:3;
+    background:linear-gradient(90deg,#ff2d9b 0%,#ccff33 52%,#2de1ff 100%);
+  }
+</style>
+</head>
+<body>
+<div id="card">
+  <img class="shot" src="img/enchanted/2.webp" alt="" />
+  <div class="wash"></div>
+  <svg class="beam" viewBox="0 0 1200 630" preserveAspectRatio="none">
+    <defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff2d9b"/><stop offset=".52" stop-color="#ccff33"/><stop offset="1" stop-color="#2de1ff"/>
+    </linearGradient></defs>
+    <path d="M-30 660 L760 -30" stroke="url(#g)" stroke-width="2.5" fill="none"/>
+    <path d="M30 660 L820 -30" stroke="url(#g)" stroke-width="1" opacity=".4" fill="none"/>
+  </svg>
+  <div class="in">
+    <div>
+      <div class="mark">
+        <svg viewBox="0 0 24 33" fill="none"><rect x="0" y="0" width="6" height="33" fill="#f5f5f7"/><rect x="9" y="0" width="15" height="6" fill="#f5f5f7"/><rect x="9" y="13.5" width="6" height="6" fill="#ccff33"/></svg>
+        <b>f34r</b>
+      </div>
+      <h1>Roblox worlds,<br /><em>built to run.</em></h1>
+    </div>
+    <div class="meta">
+      <span>400M+</span> visits contributed<br />
+      Interiors &nbsp;/&nbsp; Terrain &nbsp;/&nbsp; Full maps<br />
+      f34r.dev
+    </div>
+  </div>
+  <div class="rule"></div>
+</div>
+</body>
+</html>

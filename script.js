@@ -391,6 +391,15 @@ function renderTicker() {
   mount.style.animationDuration = `${(mount.scrollWidth / 2 / 78).toFixed(1)}s`;
 }
 
+/* Every project shot exists at 640, 1080 and full width. This builds the
+   srcset so a phone downloads a 640px file instead of the same 1920px one a
+   desktop gets. sizes is passed per call site, because the same image is a
+   full-bleed slab in one place and a sixth of the width in another. */
+function srcset(src) {
+  const base = src.replace(/.webp$/, "");
+  return `${base}-640.webp 640w, ${base}-1080.webp 1080w, ${src} 1920w`;
+}
+
 /* ============================== HERO STRIP ==============================
    The six featured builds along the bottom edge of the first screen. The hero
    had a photograph, a headline and a lot of empty floor; this puts the actual
@@ -404,7 +413,7 @@ function renderHeroStrip() {
     .map(
       (p, i) => `
       <button class="hs" type="button" data-jump="${i}">
-        <span class="hs-thumb"><img src="${p.images[0]}" alt="" loading="lazy" width="320" height="200" /></span>
+        <span class="hs-thumb"><img src="${p.images[0]}" srcset="${srcset(p.images[0])}" sizes="(max-width:1100px) 33vw, 220px" alt="" loading="lazy" width="320" height="200" /></span>
         <span class="hs-meta"><em>${String(i + 1).padStart(2, "0")}</em>${esc(p.name)}</span>
       </button>`
     )
@@ -438,7 +447,7 @@ function renderWork() {
         <span class="panel-n" aria-hidden="true">${i + 1}</span>
         <article class="slab">
           <div class="slab-media">
-            <img src="${p.images[0]}" alt="${esc(p.name)}" loading="${i < 2 ? "eager" : "lazy"}" width="1600" height="800" />
+            <img src="${p.images[0]}" srcset="${srcset(p.images[0])}" sizes="(max-width:880px) 100vw, 1400px" alt="${esc(p.name)}" loading="${i < 2 ? "eager" : "lazy"}" width="1600" height="800" />
           </div>
           <span class="slab-glow" aria-hidden="true"></span>
           <div class="slab-cap">
@@ -492,8 +501,8 @@ function renderIndex() {
       el(`
       <article class="card" data-card="${i}">
         <div class="card-media">
-          <img class="a" src="${p.images[0]}" alt="${esc(p.name)}" loading="lazy" width="960" height="640" />
-          <img class="b" src="${alt}" alt="" loading="lazy" width="960" height="640" aria-hidden="true" />
+          <img class="a" src="${p.images[0]}" srcset="${srcset(p.images[0])}" sizes="(max-width:700px) 80vw, 460px" alt="${esc(p.name)}" loading="lazy" width="960" height="640" />
+          <img class="b" src="${alt}" srcset="${srcset(alt)}" sizes="(max-width:700px) 80vw, 460px" alt="" loading="lazy" width="960" height="640" aria-hidden="true" />
         </div>
         <span class="card-ix" aria-hidden="true">${String(i + 1).padStart(2, "0")}</span>
         <span class="card-go" aria-hidden="true">${I_ARROW}</span>
@@ -530,7 +539,7 @@ function renderCraft() {
   if (media) {
     media.innerHTML = CRAFT.map(
       (c, i) =>
-        `<img src="${c.img}" alt="" loading="${i === 0 ? "eager" : "lazy"}" width="1200" height="900" class="${i === 0 ? "on" : ""}" data-shot="${i}" />`
+        `<img src="${c.img}" srcset="${srcset(c.img)}" sizes="(max-width:900px) 100vw, 620px" alt="" loading="${i === 0 ? "eager" : "lazy"}" width="1200" height="900" class="${i === 0 ? "on" : ""}" data-shot="${i}" />`
     ).join("");
   }
 
@@ -628,7 +637,7 @@ function setupCraft() {
    Each card takes a build as its backdrop so the deck is image led like the
    reference, and the whole stage is tinted by that build behind a heavy blur. */
 
-const CF = { i: 0, timer: 0, hover: false };
+const CF = { i: 0, timer: 0, hover: false, paused: false };
 
 function renderReviews() {
   const mount = document.getElementById("voicesMount");
@@ -645,7 +654,7 @@ function renderReviews() {
   const cards = REVIEWS.map(
     (r, i) => `
     <article class="cf-card" data-i="${i}" aria-roledescription="slide" aria-label="${i + 1} of ${REVIEWS.length}">
-      <img class="cf-bed" src="${beds[i]}" alt="" loading="lazy" />
+      <img class="cf-bed" src="${beds[i]}" srcset="${srcset(beds[i])}" sizes="(max-width:700px) 88vw, 392px" alt="" loading="lazy" />
       <span class="cf-veil"></span>
       <div class="cf-body">
         <div class="stars" aria-label="${r.rating} out of 5">${[1, 2, 3, 4, 5].map((n) => I_STAR(n <= r.rating)).join("")}</div>
@@ -676,6 +685,10 @@ function renderReviews() {
       </button>
       <button class="cf-nav cf-next" type="button" aria-label="Next review">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="cf-pause" id="cfPause" type="button" aria-pressed="false" aria-label="Pause the reviews">
+        <svg class="ico-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+        <svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>
       </button>
       <div class="cf-dots" id="cfDots" role="tablist" aria-label="Reviews">
         ${REVIEWS.map((_, i) => `<button type="button" role="tab" data-dot="${i}" aria-label="Review ${i + 1}"></button>`).join("")}
@@ -775,8 +788,16 @@ function setupCoverflow() {
   // Autoplay, paused on hover and off entirely under reduced motion.
   cf.addEventListener("pointerenter", () => { CF.hover = true; });
   cf.addEventListener("pointerleave", () => { CF.hover = false; });
+  const pause = document.getElementById("cfPause");
+  if (pause) {
+    pause.addEventListener("click", () => {
+      CF.paused = !CF.paused;
+      pause.setAttribute("aria-pressed", String(CF.paused));
+      pause.setAttribute("aria-label", CF.paused ? "Play the reviews" : "Pause the reviews");
+    });
+  }
   if (!reduce) {
-    CF.timer = setInterval(() => { if (!CF.hover && inView) next(); }, 5200);
+    CF.timer = setInterval(() => { if (!CF.hover && !CF.paused && inView) next(); }, 5200);
   }
 
   paint();
@@ -891,6 +912,7 @@ let lastFocus = null;
 function openProject(i) {
   const p = PROJECTS[i];
   if (!p) return;
+  if (typeof track === "function") track("project_open", { project: p.name });
   lastFocus = document.activeElement;
   closeProject(true);
 
@@ -901,20 +923,28 @@ function openProject(i) {
         <span class="mono">${esc(p.name)}</span>
         <button class="icon-btn" data-close aria-label="Close project">${I_CLOSE}</button>
       </div>
+      <div class="detail-plate">
+        <img src="${p.images[0]}" srcset="${srcset(p.images[0])}" sizes="100vw" alt="${esc(p.name)}" width="1600" height="900" fetchpriority="high" />
+        <div class="detail-plate-in wrap">
+          <span class="mono">${esc(p.year)} &nbsp;/&nbsp; ${p.count} shots</span>
+          <h2>${esc(p.name)}</h2>
+          ${tagsHTML(p.tags)}
+        </div>
+      </div>
       <div class="wrap detail-head">
-        <h2>${esc(p.name)}</h2>
-        <p>${esc(p.desc)}</p>
+        <p class="detail-lede">${esc(p.desc)}</p>
         <div class="detail-meta">
-          <div><span class="mono">Year</span><span style="margin-top:6px">${esc(p.year)}</span></div>
-          <div><span class="mono">Role</span><span style="margin-top:6px">${esc(p.role)}</span></div>
-          <div><span class="mono">Style</span><span style="margin-top:6px">${esc(p.tags.join(", "))}</span></div>
+          <div><span class="mono">Year</span><span>${esc(p.year)}</span></div>
+          <div><span class="mono">Role</span><span>${esc(p.role)}</span></div>
+          <div><span class="mono">Style</span><span>${esc(p.tags.join(", "))}</span></div>
+          <div><span class="mono">Shots</span><span>${p.count}</span></div>
         </div>
       </div>
       <div class="wrap detail-shots">
         ${p.images
           .map(
             (src, n) =>
-              `<button class="shot" type="button" data-shot="${n}" aria-label="Enlarge image ${n + 1}"><img src="${src}" alt="${esc(p.name)}, image ${n + 1}" width="1600" height="900" loading="${n < 3 ? "eager" : "lazy"}" decoding="async" /></button>`
+              `<button class="shot" type="button" data-shot="${n}" aria-label="Enlarge image ${n + 1}"><img src="${src}" srcset="${srcset(src)}" sizes="(max-width:900px) 100vw, 1280px" alt="${esc(p.name)}, image ${n + 1}" width="1600" height="900" loading="${n < 3 ? "eager" : "lazy"}" decoding="async" /></button>`
           )
           .join("")}
       </div>
@@ -1650,6 +1680,29 @@ function setupSpace() {
   }
 }
 
+/* ============================== CONVERSION EVENTS ==============================
+   Vercel Analytics was counting pageviews only, so there was no way to tell
+   whether any of this turns into work. Two moments matter: someone asking to
+   start a project, and someone opening a build. */
+function track(name, data) {
+  try {
+    if (typeof window.va === "function") window.va("event", { name, ...data });
+  } catch (e) { /* analytics must never break a click */ }
+}
+
+function setupEvents() {
+  document.addEventListener("click", (e) => {
+    const cta = e.target.closest('a[href*="discord.com"], a[href="#start"], .nav-cta');
+    if (!cta) return;
+    track("start_project_click", {
+      where: cta.closest("#start") ? "contact"
+           : cta.closest(".nav")   ? "nav"
+           : cta.closest(".hero")  ? "hero"
+           : "other",
+    });
+  });
+}
+
 /* ============================== EDGE INDEX ==============================
    Where you are in the document, down the left margin. IntersectionObserver
    only, so it costs nothing per frame. It also drives the one theme inversion:
@@ -2023,6 +2076,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEdge();
   setupInversion();
   setupRadar();
+  setupEvents();
   setupCraft();
   setupCoverflow();
   setupScramble();
