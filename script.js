@@ -255,7 +255,7 @@ const tagsHTML = (tags) => `<div class="tags">${tags.map((t) => `<span class="ta
    left a whole section stuck at opacity 0. */
 
 function setupReveal() {
-  const items = document.querySelectorAll(".rv, .rv-g, .rule, .ln");
+  const items = document.querySelectorAll(".rv, .rv-g, .rule, .ln, .hero-strip");
   if (!("IntersectionObserver" in window)) {
     items.forEach((n) => n.classList.add("in"));
     return;
@@ -389,6 +389,37 @@ function renderTicker() {
   // Keep the run time proportional to the length, so the speed does not change
   // with how many copies it took to fill the screen.
   mount.style.animationDuration = `${(mount.scrollWidth / 2 / 78).toFixed(1)}s`;
+}
+
+/* ============================== HERO STRIP ==============================
+   The six featured builds along the bottom edge of the first screen. The hero
+   had a photograph, a headline and a lot of empty floor; this puts the actual
+   work on the first screen and gives the reel a way in that is not a scroll. */
+
+function renderHeroStrip() {
+  const mount = document.getElementById("heroStrip");
+  if (!mount) return;
+
+  mount.innerHTML = PROJECTS.slice(0, FEATURED_COUNT)
+    .map(
+      (p, i) => `
+      <button class="hs" type="button" data-jump="${i}">
+        <span class="hs-thumb"><img src="${p.images[0]}" alt="" loading="lazy" width="320" height="200" /></span>
+        <span class="hs-meta"><em>${String(i + 1).padStart(2, "0")}</em>${esc(p.name)}</span>
+      </button>`
+    )
+    .join("");
+
+  mount.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-jump]");
+    if (!b) return;
+    const panel = document.querySelectorAll(".panel")[Number(b.dataset.jump)];
+    if (!panel) return;
+    // land on the panel, not the top of the section it lives in
+    const y = panel.getBoundingClientRect().top + window.scrollY;
+    if (typeof lenis !== "undefined" && lenis) lenis.scrollTo(y);
+    else window.scrollTo({ top: y, behavior: "smooth" });
+  });
 }
 
 /* ============================== WORK: THE REEL ==============================
@@ -1975,6 +2006,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupBoot();
 
   renderTicker();
+  renderHeroStrip();
   renderWork();
   renderIndex();
   renderCraft();

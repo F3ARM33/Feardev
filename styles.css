@@ -1095,3 +1095,85 @@ body.inverted .edge li.on b{ color:#0a0d02; }
   color:var(--text-faint);
 }
 .dc-handle-out svg{ width:14px; height:14px; }
+
+/* ============================== HERO: FRAME, DIMENSION, STRIP ==============================
+   The first screen was a photograph, a headline and a lot of empty floor. It
+   now carries the same instrument language as the rest of the page, and the
+   work itself is on it. */
+
+/* registration marks at the corners of the frame */
+.hero-marks{
+  position:absolute; top:clamp(88px,9vh,104px); bottom:clamp(150px,20vh,214px);
+  left:50%; translate:-50% 0; width:calc(100% - (var(--gut) * 2)); max-width:var(--maxw);
+  z-index:1; pointer-events:none;
+  stroke:rgba(255,255,255,.3); stroke-width:1; fill:none;
+}
+
+/* a dimension line under the headline, the way a drawing annotates a span */
+.hero-dim{
+  display:flex; align-items:center; gap:12px; margin:22px 0 0; max-width:30ch;
+}
+.hero-dim i{ flex:1; height:1px; background:var(--spectrum); opacity:.85; position:relative; }
+.hero-dim i::before, .hero-dim i::after{
+  content:''; position:absolute; top:-3px; width:1px; height:7px; background:currentColor; opacity:.5;
+}
+.hero-dim i::before{ left:0; } .hero-dim i::after{ right:0; }
+.hero-dim b{
+  font-family:var(--mono); font-size:9.5px; letter-spacing:.24em; font-weight:500;
+  color:var(--text-faint); white-space:nowrap;
+}
+
+/* the six featured builds along the bottom edge */
+.hero-strip{
+  position:absolute; left:var(--gut); right:var(--gut); bottom:clamp(22px,3.4vh,34px); z-index:2;
+  display:grid; grid-template-columns:repeat(6,1fr); gap:clamp(8px,1vw,14px);
+}
+.hs{
+  position:relative; display:block; padding:0; text-align:left;
+  opacity:0; translate:0 14px;
+  transition:opacity .7s var(--ease), translate .7s var(--ease);
+}
+.rv.in ~ .hero-strip .hs, .hero-strip.in .hs{ opacity:1; translate:0 0; }
+.hero-strip.in .hs:nth-child(1){ transition-delay:.05s } .hero-strip.in .hs:nth-child(2){ transition-delay:.11s }
+.hero-strip.in .hs:nth-child(3){ transition-delay:.17s } .hero-strip.in .hs:nth-child(4){ transition-delay:.23s }
+.hero-strip.in .hs:nth-child(5){ transition-delay:.29s } .hero-strip.in .hs:nth-child(6){ transition-delay:.35s }
+.hs-thumb{
+  display:block; aspect-ratio:16/10; border-radius:var(--r); overflow:hidden;
+  background:var(--surface-2); box-shadow:0 0 0 1px rgba(255,255,255,.12);
+  transition:box-shadow .35s var(--ease), translate .35s var(--ease);
+}
+.hs-thumb img{ width:100%; height:100%; object-fit:cover; opacity:.66; transition:opacity .4s var(--ease), scale .6s var(--ease); }
+.hs:hover .hs-thumb{ box-shadow:0 0 0 1px var(--c-cyan), 0 14px 30px -14px rgba(0,0,0,.9); translate:0 -4px; }
+.hs:hover .hs-thumb img{ opacity:1; scale:1.06; }
+.hs:focus-visible .hs-thumb{ box-shadow:0 0 0 2px var(--accent); }
+.hs-meta{
+  display:flex; align-items:baseline; gap:8px; margin-top:9px;
+  font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--text-faint); transition:color .3s var(--ease);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.hs-meta em{ font-style:normal; color:var(--c-cyan); }
+.hs:hover .hs-meta{ color:var(--text); }
+
+@media (max-width:1100px){
+  .hero-strip{ grid-template-columns:repeat(3,1fr); }
+  .hero-strip .hs:nth-child(n+4){ display:none; }
+}
+@media (max-width:760px){ .hero-strip, .hero-marks{ display:none; } }
+@media (prefers-reduced-motion: reduce){ .hs{ opacity:1 !important; translate:none !important; } }
+
+/* the hero content sits above the strip rather than centring through it */
+.hero{ padding-bottom:clamp(140px,20vh,210px) !important; }
+
+/* the strip is measured against the same column as the headline above it,
+   rather than running the full gutter width */
+.hero-strip{
+  left:50%; right:auto; translate:-50% 0;
+  width:calc(100% - (var(--gut) * 2)); max-width:var(--maxw);
+}
+.hs-thumb{ aspect-ratio:16/9; max-height:132px; }
+.hs-thumb img{ display:block; }
+
+/* .hero-in is max-width:maxw with gut padding inside it, so the content edge
+   sits a gutter in from the maxw box. The strip and marks match that edge. */
+.hero-strip, .hero-marks{ max-width:calc(var(--maxw) - (var(--gut) * 2)) !important; }
