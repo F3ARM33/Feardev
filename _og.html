@@ -32,7 +32,7 @@
     display:flex; align-items:flex-end; justify-content:space-between; gap:40px;
   }
   h1{
-    font-weight:800; font-size:82px; line-height:.94; letter-spacing:-.05em; max-width:13ch;
+    font-weight:800; font-size:72px; line-height:.96; letter-spacing:-.05em; max-width:14ch;
   }
   h1 em{ font-style:normal; color:#ccff33; }
   .mark{ display:flex; align-items:center; gap:14px; margin-bottom:26px; }
@@ -66,7 +66,7 @@
         <svg viewBox="0 0 24 33" fill="none"><rect x="0" y="0" width="6" height="33" fill="#f5f5f7"/><rect x="9" y="0" width="15" height="6" fill="#f5f5f7"/><rect x="9" y="13.5" width="6" height="6" fill="#ccff33"/></svg>
         <b>f34r</b>
       </div>
-      <h1>Roblox worlds,<br /><em>built to run.</em></h1>
+      <h1>Worlds that hold up<br />at <em>400 million</em> visits.</h1>
     </div>
     <div class="meta">
       <span>400M+</span> visits contributed<br />
@@ -76,5 +76,73 @@
   </div>
   <div class="rule"></div>
 </div>
+<button id="render" style="position:fixed;top:16px;left:16px;z-index:9;padding:10px 18px;border-radius:999px;border:0;background:#ccff33;color:#0a0d02;font:600 14px system-ui;cursor:pointer">Download og-cover.jpg</button>
+<script>
+/* The card above is the layout reference. This draws the same thing to a
+   canvas at exactly 1200x630 and downloads it, which is how img/og-cover.jpg
+   is produced. Screenshotting the div works too but is at the mercy of window
+   scaling; this is exact, and it uses the real webfont because the page has
+   already loaded it. */
+document.getElementById("render").addEventListener("click", async () => {
+  await document.fonts.load('800 72px "Bricolage Grotesque"');
+  await document.fonts.load('500 15px "Geist Mono"');
+  const W = 1200, H = 630;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const x = cv.getContext("2d");
+  const img = document.querySelector("#card img.shot");
+  const s = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+  const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+  x.drawImage(img, (W - dw) / 2, (H - dh) / 2, dw, dh);
+
+  let g = x.createLinearGradient(0, H, 0, 0);
+  g.addColorStop(0, "#0a0a0d"); g.addColorStop(.46, "rgba(10,10,13,.36)"); g.addColorStop(1, "rgba(10,10,13,.06)");
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  g = x.createLinearGradient(0, 0, W, 0);
+  g.addColorStop(0, "rgba(10,10,13,.88)"); g.addColorStop(.52, "rgba(10,10,13,.3)"); g.addColorStop(.82, "rgba(10,10,13,0)");
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+
+  const bg = x.createLinearGradient(0, H, W, 0);
+  bg.addColorStop(0, "#ff2d9b"); bg.addColorStop(.52, "#ccff33"); bg.addColorStop(1, "#2de1ff");
+  x.strokeStyle = bg; x.lineWidth = 2.5;
+  x.beginPath(); x.moveTo(-30, 660); x.lineTo(760, -30); x.stroke();
+  x.globalAlpha = .4; x.lineWidth = 1;
+  x.beginPath(); x.moveTo(30, 660); x.lineTo(820, -30); x.stroke();
+  x.globalAlpha = 1;
+
+  const mx = 66, my = 430;
+  x.fillStyle = "#f5f5f7";
+  x.fillRect(mx, my, 6.2, 34); x.fillRect(mx + 9.3, my, 15.5, 6.2);
+  x.fillStyle = "#ccff33"; x.fillRect(mx + 9.3, my + 13.9, 6.2, 6.2);
+  x.fillStyle = "#f5f5f7";
+  x.font = '800 30px "Bricolage Grotesque", sans-serif';
+  x.fillText("f34r", mx + 40, my + 27);
+
+  x.font = '800 72px "Bricolage Grotesque", sans-serif';
+  x.fillText("Worlds that hold up", 66, 512);
+  const p = "at "; x.fillText(p, 66, 581);
+  const pw = x.measureText(p).width;
+  x.fillStyle = "#ccff33"; x.fillText("400 million", 66 + pw, 581);
+  const nw = x.measureText("400 million").width;
+  x.fillStyle = "#f5f5f7"; x.fillText(" visits.", 66 + pw + nw, 581);
+
+  x.font = '500 15px "Geist Mono", monospace'; x.textAlign = "right";
+  x.fillStyle = "#ccff33";
+  x.fillText("400M+", 1134 - x.measureText(" visits contributed").width, 512);
+  x.fillStyle = "#a3a3ad";
+  x.fillText(" visits contributed", 1134, 512);
+  x.fillText("INTERIORS  /  TERRAIN  /  FULL MAPS", 1134, 542);
+  x.fillText("F34R.DEV", 1134, 572);
+  x.textAlign = "left";
+
+  const rg = x.createLinearGradient(0, 0, W, 0);
+  rg.addColorStop(0, "#ff2d9b"); rg.addColorStop(.52, "#ccff33"); rg.addColorStop(1, "#2de1ff");
+  x.fillStyle = rg; x.fillRect(0, H - 5, W, 5);
+
+  const a = document.createElement("a");
+  a.download = "og-cover.jpg";
+  a.href = cv.toDataURL("image/jpeg", 0.9);
+  a.click();
+});
+</script>
 </body>
 </html>
