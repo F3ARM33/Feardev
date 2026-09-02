@@ -1,6 +1,8 @@
 /* ============================== DATA ============================== */
 
 const AMBIENT = {
+  "img/stud-hub": ["#1fc9e8", "#63d92f"],
+  "img/stud-tycoon": ["#28bff0", "#7d5fd0"],
   "img/enchanted": [
     "#b3199c",
     "#5a1ecc"
@@ -52,6 +54,22 @@ const AMBIENT = {
 };
 
 const PROJECTS = [
+  {
+    name: "Stud Trading Hub",
+    tags: ["Stud", "Hub", "Low-Poly"],
+    year: "2026",
+    role: "Full map, layout, signage",
+    desc: "A stud-built trading island for a collection game. Rows of market stalls fan out from a fenced central arena, with the auction plaza, pack shop and season pass stands placed on the sight lines players walk in on. Everything is studs and flat colour, so the island costs almost nothing to render and reads instantly at any distance.",
+    folder: "img/stud-hub", count: 6,
+  },
+  {
+    name: "Stud Tycoon Islands",
+    tags: ["Stud", "Tycoon", "Multiplayer"],
+    year: "2026",
+    role: "Full map, plot layout, economy staging",
+    desc: "A tycoon map built as claimable plots either side of a central conveyor spine, with the sell station at the near end and the gacha and upgrade shops staged along the walk. Plot boundaries, claim markers and price boards are all part of the build, so the economy is legible from the moment a player spawns.",
+    folder: "img/stud-tycoon", count: 8,
+  },
   {
     name: "Enchanted Grove",
     tags: ["Stylized", "Terrain", "Lighting"],
@@ -369,7 +387,7 @@ function setupNav() {
    The single marquee on the page. It states the service in the accent colour,
    edge to edge, so there is one hard break between the hero and the work. */
 
-const TICKER = ["Terrain", "Interiors", "Lighting", "Set dressing", "Optimization", "Full maps"];
+const TICKER = ["Stud maps", "Terrain", "Interiors", "Tycoons", "Lighting", "Set dressing", "Optimization", "Full maps"];
 
 function renderTicker() {
   const mount = document.getElementById("tickerMount");
