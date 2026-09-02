@@ -360,7 +360,7 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
 @media (max-width:820px){ .space{ display:none; } }
 
 /* ============================== REEL (family C: pinned stack) ============================== */
-.reel{ position:relative; }
+.reel{ position:relative; overflow:clip; }
 .panel{
   position:sticky; top:0; height:100dvh; z-index:1;
   display:flex; align-items:center; justify-content:center;
@@ -776,3 +776,92 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
 .foot{ border-top:1px solid var(--line); padding:42px 0; display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; }
 .foot span, .foot a{ font-size:13.5px; color:var(--text-faint); }
 .foot a:hover{ color:var(--accent); }
+
+/* ============================== EDGE INDEX ==============================
+   The reference runs a tiny index down the left edge, so you always know where
+   you are in the document without a scrollbar telling you. */
+.edge{
+  position:fixed; left:calc(var(--gut) * .42); top:50%; translate:0 -50%; z-index:45;
+  pointer-events:none;
+}
+.edge ol{ margin:0; padding:0; display:flex; flex-direction:column; gap:14px; }
+.edge li{ list-style:none; display:flex; align-items:center; gap:10px; }
+.edge i{ display:block; width:14px; height:1px; background:rgba(255,255,255,.26); transition:background .4s var(--ease), width .4s var(--ease); }
+.edge b{
+  font-family:var(--mono); font-size:9.5px; letter-spacing:.18em; text-transform:uppercase;
+  font-weight:500; color:var(--text-faint); opacity:0; translate:-6px 0;
+  transition:opacity .4s var(--ease), translate .4s var(--ease), color .4s var(--ease);
+}
+.edge li.on i{ background:var(--accent); width:26px; }
+.edge li.on b{ opacity:1; translate:0 0; color:var(--accent); }
+@media (max-width:1180px){ .edge{ display:none; } }
+/* the index inverts along with the page in the one light section */
+body.inverted .edge i{ background:rgba(0,0,0,.3); }
+body.inverted .edge b{ color:rgba(0,0,0,.5); }
+body.inverted .edge li.on i{ background:#0a0d02; }
+body.inverted .edge li.on b{ color:#0a0d02; }
+
+/* ============================== RADAR ==============================
+   An instrument, not an ornament: the sweep and the pip both track how far
+   through the reel you are. */
+.radar{
+  width:78px; height:78px; margin:0 0 18px auto; display:block;
+  stroke:rgba(255,255,255,.2); stroke-width:1; fill:none;
+}
+.radar .sweep{ stroke:var(--accent); stroke-width:1.5; transform-origin:50px 50px; }
+.radar .pip{ fill:var(--accent); stroke:none; transform-origin:50px 50px; }
+@media (max-width:1180px){ .radar{ display:none; } }
+
+/* ============================== FIELD (full bleed, no chrome) ==============================
+   One build given the entire frame with nothing on top of it but its own name.
+   The reference does this once; so does this page. */
+.field{ position:relative; height:100dvh; overflow:hidden; }
+.field-media{ position:absolute; inset:0; }
+.field-media img{ width:100%; height:100%; object-fit:cover; will-change:transform; }
+.field-media::after{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(to top, rgba(6,6,9,.92) 2%, rgba(6,6,9,.2) 44%, rgba(6,6,9,.34) 100%);
+}
+.field-in{
+  pointer-events:none; position:absolute; left:var(--gut); right:var(--gut); bottom:clamp(40px,8vh,84px); z-index:2;
+  display:flex; align-items:flex-end; justify-content:space-between; gap:28px; flex-wrap:wrap;
+}
+.field-in h2{ font-size:clamp(2.6rem,9vw,8rem); letter-spacing:-.06em; margin-top:14px; }
+/* the whole frame is the target, as one real button under the caption, rather
+   than a pseudo element stretched far past its own section */
+.field-hit{ position:absolute; inset:0; z-index:1; color:transparent; font-size:0; cursor:pointer; }
+.field-hit:focus-visible{ outline:2px solid var(--accent); outline-offset:-6px; }
+.field:hover .open-cue{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+
+/* ============================== VISION (the one inversion) ==============================
+   The page flips to light exactly once, with a hard edge top and bottom. It is
+   the only section with no photograph in it, which is the point: it is the
+   argument, not the evidence. */
+.vision{
+  position:relative; background:#f4f4f0; color:#0d0d10; overflow:hidden;
+  padding:clamp(100px,16vh,190px) 0; isolation:isolate;
+  border-block:1px solid rgba(0,0,0,.12);
+}
+.vision-word{
+  position:absolute; left:50%; top:50%; translate:-50% -50%; z-index:0; white-space:nowrap;
+  font-family:var(--disp); font-weight:800; font-size:clamp(8rem,26vw,24rem); line-height:.8;
+  letter-spacing:-.07em; color:transparent; -webkit-text-stroke:1px rgba(0,0,0,.09);
+  pointer-events:none; user-select:none;
+}
+.vision-beam{ position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:.9; }
+.vision-in{ position:relative; z-index:1; }
+.vision-in .mono{ color:rgba(0,0,0,.46); }
+.vision h2{ font-size:clamp(2.2rem,6.4vw,5.2rem); letter-spacing:-.055em; margin-top:22px; max-width:16ch; }
+.vision h2 em{ font-style:normal; color:#4b6b00; }
+.vision-body{ margin-top:34px; max-width:56ch; font-size:clamp(1rem,1.35vw,1.15rem); color:rgba(0,0,0,.66); }
+@media (prefers-reduced-motion: reduce){ .vision-beam{ display:none; } }
+
+/* ============================== MORE WORKS ============================== */
+.more-works{
+  display:inline-flex; align-items:center; gap:8px; margin-top:26px;
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--text-faint); transition:color .3s var(--ease);
+}
+.more-works span{ transition:translate .35s var(--ease); }
+.more-works:hover{ color:var(--accent); }
+.more-works:hover span{ translate:3px -3px; }

@@ -59,6 +59,17 @@
   <path d="M1044 300 h-14 M1116 300 h14 M1080 264 v-14 M1080 336 v14" />
   <path d="M56 56 h34 M56 56 v34 M1384 844 h-34 M1384 844 v-34" />
 </svg>
+<nav class="edge" id="edge" aria-hidden="true">
+  <ol>
+    <li data-sec="work"><i></i><b>Work</b></li>
+    <li data-sec="field"><i></i><b>Field</b></li>
+    <li data-sec="index"><i></i><b>Shelf</b></li>
+    <li data-sec="vision"><i></i><b>Vision</b></li>
+    <li data-sec="craft"><i></i><b>Craft</b></li>
+    <li data-sec="clients"><i></i><b>Clients</b></li>
+    <li data-sec="start"><i></i><b>Contact</b></li>
+  </ol>
+</nav>
 <div class="grid-lines" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 <div class="grain" aria-hidden="true"></div>
 
@@ -145,7 +156,30 @@
     <canvas class="space" id="space" aria-hidden="true"></canvas>
     <div id="workMount"></div>
   </div>
-  <nav class="reel-rail" id="reelRail" aria-hidden="true"><ol></ol></nav>
+  <nav class="reel-rail" id="reelRail" aria-hidden="true">
+    <svg class="radar" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+      <circle cx="50" cy="50" r="46" />
+      <circle cx="50" cy="50" r="30" stroke-dasharray="1.5 5" />
+      <circle cx="50" cy="50" r="14" />
+      <path d="M4 50h12M84 50h12M50 4v12M50 84v12" />
+      <g id="radarSweep"><path class="sweep" d="M50 50 L50 4" /></g>
+      <circle class="pip" id="radarPip" cx="50" cy="20" r="2.6" />
+    </svg>
+    <ol></ol>
+  </nav>
+</section>
+
+<!-- FIELD: one build, edge to edge, no chrome at all -->
+<section class="field" id="field" aria-label="Wizard Tower, full frame">
+  <div class="field-media"><img src="img/wizard-tower/2.webp" alt="Interior of a hollowed wizard tower built around a living tree, Roblox Studio" width="1920" height="960" loading="lazy" /></div>
+  <button class="field-hit" type="button" data-i="1">Open project: Wizard Tower</button>
+  <div class="field-in">
+    <div>
+      <span class="mono" id="fieldTag">INTERIOR / 11 SHOTS / 2026</span>
+      <h2><span class="ln"><span>Wizard Tower</span></span></h2>
+    </div>
+    <span class="open-cue" aria-hidden="true">Open project <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+  </div>
 </section>
 
 <!-- INDEX: horizontal pan -->
@@ -156,7 +190,25 @@
       <h2>The rest of <em>the shelf</em>.</h2>
       <p>Lobbies, terrain, interiors, and prop sets from the last three years.</p>
       <div class="rule in"></div>
+      <a class="more-works" href="#start">More works on request <span>&#8599;</span></a>
     </div>
+  </div>
+</section>
+
+<!-- VISION: the one place the page inverts. Deliberate, once, with a hard edge. -->
+<section class="vision" id="vision">
+  <span class="vision-word" aria-hidden="true">VISION</span>
+  <svg class="vision-beam" aria-hidden="true" viewBox="0 0 1200 800" preserveAspectRatio="none">
+    <defs><linearGradient id="vg" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff2d9b"/><stop offset="0.5" stop-color="#ccff33"/><stop offset="1" stop-color="#2de1ff"/>
+    </linearGradient></defs>
+    <path d="M120 780 L1080 20" stroke="url(#vg)" stroke-width="3" fill="none"/>
+    <path d="M170 780 L1130 20" stroke="url(#vg)" stroke-width="1" opacity=".5" fill="none"/>
+  </svg>
+  <div class="wrap vision-in">
+    <span class="mono" id="visionEyebrow">THE WHOLE POINT</span>
+    <h2 class="rv"><span class="ln"><span>Detailed enough to sell</span></span><span class="ln"><span>the world. Light enough</span></span><span class="ln"><span>to run on a <em>phone</em>.</span></span></h2>
+    <p class="vision-body rv">Most maps fail one of those two tests. A build that looks incredible in Studio and drops a phone to fifteen frames has not shipped. Neither has one that runs beautifully and looks like a greybox. Every decision on every build is that trade, made on purpose, with the part count watched from the first block.</p>
   </div>
 </section>
 

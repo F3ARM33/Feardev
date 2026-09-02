@@ -524,7 +524,7 @@ function renderCraft() {
 /* Mono labels resolve out of noise as they arrive. Only the mono ones, where a
    fixed advance width means nothing around them reflows while they land. */
 function setupScramble() {
-  const nodes = [...document.querySelectorAll(".sec-head .mono, .step-k")];
+  const nodes = [...document.querySelectorAll(".sec-head .mono, .step-k, .vision-in .mono, #fieldTag")];
   if (!nodes.length || !("IntersectionObserver" in window)) return;
   const io = new IntersectionObserver(
     (entries) => {
@@ -1483,6 +1483,76 @@ function setupSpace() {
   }
 }
 
+/* ============================== EDGE INDEX ==============================
+   Where you are in the document, down the left margin. IntersectionObserver
+   only, so it costs nothing per frame. It also drives the one theme inversion:
+   when the light section owns the viewport, body.inverted flips the fixed
+   layers that would otherwise stay dark on top of it. */
+
+function setupEdge() {
+  const edge = document.getElementById("edge");
+  if (!edge || !("IntersectionObserver" in window)) return;
+
+  const items = [...edge.querySelectorAll("li")];
+  const map = new Map();
+  items.forEach((li) => {
+    const sec = document.getElementById(li.dataset.sec);
+    if (sec) map.set(sec, li);
+  });
+  if (!map.size) return;
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      const hit = entries
+        .filter((e) => e.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!hit) return;
+      items.forEach((li) => li.classList.toggle("on", li === map.get(hit.target)));
+    },
+    { rootMargin: "-45% 0px -45% 0px", threshold: [0, 0.5, 1] }
+  );
+  map.forEach((_li, sec) => io.observe(sec));
+}
+
+/* The single inversion. The ambient, blueprint and grid layers are fixed, so
+   they have to be told when the light section is covering them; otherwise dark
+   hairlines sit on top of a white page. */
+function setupInversion() {
+  const vision = document.getElementById("vision");
+  if (!vision || !("IntersectionObserver" in window)) return;
+
+  new IntersectionObserver(
+    ([e]) => {
+      const covering = e.isIntersecting && e.intersectionRatio > 0.55;
+      document.body.classList.toggle("inverted", covering);
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute("content", covering ? "#f4f4f0" : "#08080a");
+    },
+    { threshold: [0, 0.55, 0.9] }
+  ).observe(vision);
+}
+
+/* ============================== RADAR ==============================
+   The sweep and the pip both read the reel's progress, so the instrument is
+   actually reporting something rather than spinning for effect. */
+
+function setupRadar() {
+  const sweep = document.getElementById("radarSweep");
+  const pip = document.getElementById("radarPip");
+  if (!sweep || !window.ScrollTrigger) return;
+
+  ScrollTrigger.create({
+    trigger: "#work",
+    start: "top top",
+    end: "bottom bottom",
+    onUpdate: (self) => {
+      const deg = self.progress * 360;
+      sweep.style.transform = `rotate(${deg}deg)`;
+      if (pip) pip.style.transform = `rotate(${deg}deg)`;
+    },
+  });
+}
+
 /* ============================== POINTER PHYSICS ==============================
    Feedback only, and only where a click is the point: the CTAs pull toward the
    cursor, and the slabs light up under it. Transform and one custom property,
@@ -1741,6 +1811,38 @@ function setupMotion() {
     });
   }
 
+  /* -- The field. One build at full frame, the image drifting behind a fixed
+        frame so the section breathes without moving the type. -- */
+  const fieldImg = document.querySelector(".field-media img");
+  if (fieldImg) {
+    gsap.fromTo(
+      fieldImg,
+      { scale: 1.18, yPercent: -4 },
+      {
+        scale: 1,
+        yPercent: 4,
+        ease: "none",
+        scrollTrigger: { trigger: ".field", start: "top bottom", end: "bottom top", scrub: true },
+      }
+    );
+  }
+
+  /* -- The beam in the light section draws across as it arrives. -- */
+  gsap.utils.toArray(".vision-beam path").forEach((p, i) => {
+    const len = p.getTotalLength ? p.getTotalLength() : 1400;
+    gsap.fromTo(
+      p,
+      { strokeDasharray: len, strokeDashoffset: len },
+      {
+        strokeDashoffset: 0,
+        duration: 1.6,
+        delay: i * 0.12,
+        ease: "power3.out",
+        scrollTrigger: { trigger: ".vision", start: "top 72%" },
+      }
+    );
+  });
+
   // Images finish loading after ScrollTrigger measures, which shifts every
   // start and end. Recalculate once everything has settled.
   window.addEventListener("load", () => ScrollTrigger.refresh());
@@ -1766,6 +1868,11 @@ document.addEventListener("DOMContentLoaded", () => {
   setupCountUp();
   setupAmbient();
   setupSpace();
+  setupEdge();
+  setupInversion();
+  setupRadar();
+  const fieldHit = document.querySelector(".field-hit");
+  if (fieldHit) fieldHit.addEventListener("click", () => openProject(Number(fieldHit.dataset.i)));
   setupCraft();
   setupScramble();
   setupClock();
