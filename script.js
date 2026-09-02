@@ -844,7 +844,7 @@ function setupClock() {
   // Tick on the minute rather than every second: nothing here needs seconds,
   // and an interval that fires 60 times more often buys nothing.
   setInterval(paint, 20000);
-  if (zone) zone.textContent = "Pakistan, GMT +5";
+  if (zone) zone.textContent = "GMT +5";
 }
 
 /* ============================== DISCORD CARD MARKUP ==============================
