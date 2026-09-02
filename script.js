@@ -1316,6 +1316,173 @@ function setupAmbient() {
   }
 }
 
+/* ============================== THE SPACE ==============================
+   An infinite perspective grid the work sits inside, drawn on a 2D canvas.
+
+   The reference does this with Three.js. It does not need to be: a floor and
+   ceiling of converging lines plus travelling depth rules gets the same read
+   for a few hundred bytes of maths and no dependency. The grid travels toward
+   you as you scroll and drifts against the cursor, so the reel reads as a room
+   you are moving through rather than a stack of cards on a page.
+
+   It only runs while the section is on screen, and not at all under reduced
+   motion, where the static CSS field stands in for it. */
+
+function setupSpace() {
+  const cv = document.getElementById("space");
+  if (!cv) return;
+
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) return;
+
+  const ctx = cv.getContext("2d", { alpha: true });
+  if (!ctx) return;
+
+  let w = 0;
+  let h = 0;
+  let raf = 0;
+  let live = false;
+  let phase = 0;
+  let scrollPhase = 0;
+
+  // pointer drift, eased toward the target rather than snapped
+  let px = 0;
+  let py = 0;
+  let tx = 0;
+  let ty = 0;
+
+  const COLS = 26;      // converging lines each side of the vanishing point
+  const ROWS = 22;      // travelling depth rules
+  const SPREAD = 2.6;   // how far the floor fans out past the viewport
+
+  const resize = () => {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = cv.clientWidth;
+    h = cv.clientHeight;
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+
+  // Depth rules bunch up toward the horizon. k is 0 at the viewer and 1 at the
+  // vanishing point; the reciprocal is what makes it read as perspective
+  // rather than as a set of evenly spaced lines.
+  const depth = (k) => 1 / (k + 0.42);
+
+  const plane = (hz, vx, dir) => {
+    const far = h * 0.5 * dir;
+    const near = dir > 0 ? h - hz : hz;
+
+    // converging lines
+    for (let i = -COLS; i <= COLS; i++) {
+      const edge = vx + (i / COLS) * w * SPREAD;
+      const fade = 1 - Math.min(1, Math.abs(i) / COLS);
+      ctx.globalAlpha = 0.08 + fade * 0.2;
+      ctx.beginPath();
+      ctx.moveTo(vx, hz);
+      ctx.lineTo(edge, hz + near * dir);
+      ctx.stroke();
+    }
+
+    // travelling depth rules
+    for (let k = 0; k < ROWS; k++) {
+      const d = depth(k + phase);
+      const y = hz + near * d * dir;
+      if (dir > 0 ? y > h || y < hz : y < 0 || y > hz) continue;
+      const fade = Math.min(1, d * 1.5);
+      ctx.globalAlpha = 0.06 + fade * 0.26;
+      const half = w * SPREAD * d;
+      ctx.beginPath();
+      ctx.moveTo(vx - half, y);
+      ctx.lineTo(vx + half, y);
+      ctx.stroke();
+    }
+    void far;
+  };
+
+  const draw = () => {
+    raf = 0;
+    if (!live) return;
+
+    px += (tx - px) * 0.06;
+    py += (ty - py) * 0.06;
+
+    const hz = h * (0.46 + py * 0.05);
+    const vx = w * (0.5 + px * 0.09);
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(255,255,255,0.9)";
+
+    plane(hz, vx, 1);   // floor
+    plane(hz, vx, -1);  // ceiling
+
+    // the horizon itself, and the vanishing point marked like a datum
+    ctx.globalAlpha = 0.3;
+    ctx.beginPath();
+    ctx.moveTo(0, hz);
+    ctx.lineTo(w, hz);
+    ctx.stroke();
+
+    ctx.globalAlpha = 0.5;
+    ctx.strokeStyle = "rgba(204,255,51,0.9)";
+    ctx.beginPath();
+    ctx.moveTo(vx - 9, hz);
+    ctx.lineTo(vx + 9, hz);
+    ctx.moveTo(vx, hz - 9);
+    ctx.lineTo(vx, hz + 9);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    raf = requestAnimationFrame(draw);
+  };
+
+  const kick = () => {
+    if (!raf && live) raf = requestAnimationFrame(draw);
+  };
+
+  // Only paint while the section is actually on screen.
+  const host = cv.closest("section") || cv.parentElement;
+  if ("IntersectionObserver" in window && host) {
+    new IntersectionObserver(
+      ([e]) => {
+        live = e.isIntersecting;
+        if (live) { resize(); kick(); }
+        else if (raf) { cancelAnimationFrame(raf); raf = 0; }
+      },
+      { rootMargin: "20% 0px" }
+    ).observe(host);
+  } else {
+    live = true;
+    resize();
+    kick();
+  }
+
+  window.addEventListener("resize", () => { resize(); kick(); });
+
+  if (window.matchMedia("(pointer: fine)").matches) {
+    window.addEventListener("pointermove", (e) => {
+      tx = (e.clientX / window.innerWidth - 0.5) * 2;
+      ty = (e.clientY / window.innerHeight - 0.5) * 2;
+      kick();
+    });
+  }
+
+  // Scroll drives travel: moving down the page moves you through the space.
+  if (window.ScrollTrigger && host) {
+    ScrollTrigger.create({
+      trigger: host,
+      start: "top bottom",
+      end: "bottom top",
+      onUpdate: (self) => {
+        scrollPhase = self.progress;
+        phase = (scrollPhase * ROWS) % 1;
+        kick();
+      },
+    });
+  }
+}
+
 /* ============================== POINTER PHYSICS ==============================
    Feedback only, and only where a click is the point: the CTAs pull toward the
    cursor, and the slabs light up under it. Transform and one custom property,
@@ -1598,6 +1765,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupReveal();
   setupCountUp();
   setupAmbient();
+  setupSpace();
   setupCraft();
   setupScramble();
   setupClock();
