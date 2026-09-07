@@ -1,0 +1,34 @@
+{
+  "stops": [
+    {
+      "build": "Stud Trading Hub",
+      "glow": "#1ccded",
+      "deep": "#03323a"
+    },
+    {
+      "build": "Stud Tycoon Islands",
+      "glow": "#15bef4",
+      "deep": "#022d3c"
+    },
+    {
+      "build": "Enchanted Grove",
+      "glow": "#e624c9",
+      "deep": "#380530"
+    },
+    {
+      "build": "Wizard Tower",
+      "glow": "#ea581f",
+      "deep": "#391304"
+    },
+    {
+      "build": "Astral Lounge",
+      "glow": "#de9d2b",
+      "deep": "#362507"
+    },
+    {
+      "build": "Astral Promenade",
+      "glow": "#c58844",
+      "deep": "#301f0e"
+    }
+  ]
+}

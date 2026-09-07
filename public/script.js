@@ -435,7 +435,7 @@ function renderHeroStrip() {
   mount.innerHTML = PROJECTS.slice(0, FEATURED_COUNT)
     .map(
       (p, i) => `
-      <button class="hs" type="button" data-jump="${i}">
+      <button class="hs" type="button" data-jump="${i}" style="--hs-c:${p.amb[0]}">
         <span class="hs-thumb"><img src="${p.images[0]}" srcset="${srcset(p.images[0])}" sizes="(max-width:1100px) 33vw, 220px" alt="" loading="lazy" width="320" height="200" /></span>
         <span class="hs-meta"><em>${String(i + 1).padStart(2, "0")}</em>${esc(p.name)}</span>
       </button>`

@@ -42,6 +42,7 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" />
   <script>if("scrollRestoration" in history) history.scrollRestoration="manual";</script>
+  <link rel="stylesheet" href="/palette.css" />
   <link rel="stylesheet" href="/vendor/liquid-glass/glass.css" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
@@ -117,7 +118,10 @@
 
 <!-- HERO: editorial split, numbers as a rail rather than a row of cards -->
 <header class="hero" id="top">  <div class="sg-mount" id="shaderMount" aria-hidden="true"></div>
-  <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+  <!-- The landing gradient. One blob per featured build, each in that
+       build's own colour, taken from the same AMBIENT map that tints the
+       page as you scroll past it. See scripts/build-palette.mjs. -->
+  <div class="hero-mesh" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
   <svg class="hero-beam" aria-hidden="true" viewBox="0 0 1400 900" preserveAspectRatio="none">
     <defs><linearGradient id="hg" x1="0" y1="1" x2="1" y2="0">
       <stop offset="0" stop-color="#ff2d9b"/><stop offset="0.52" stop-color="#ccff33"/><stop offset="1" stop-color="#2de1ff"/>

@@ -1465,3 +1465,127 @@ body.inverted .edge li.on b{ color:#0a0d02; }
 .nf h1{ font-size:clamp(1.7rem,3.6vw,2.6rem); letter-spacing:-.035em; margin:26px 0 12px; }
 .nf p{ font-size:16px; color:var(--text-dim); max-width:46ch; margin:0 auto 34px; }
 .nf-row{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+/* ==========================================================================
+   THE BUILD MESH
+   The landing page gradient, made from the builds themselves. Each blob is
+   one featured build, in the colour that build tints the page with when you
+   scroll past it later on. The colours come from public/palette.css, which
+   is generated from the AMBIENT map by scripts/build-palette.mjs.
+
+   Everyone sees this, including phones, where the WebGL layer never loads.
+   It is the landing page background in its own right, not a fallback.
+   ========================================================================== */
+
+.hero-mesh{
+  position:absolute; inset:0; z-index:-1; overflow:hidden; pointer-events:none;
+  /* The bed the blobs sit on: the two deepest build tones, so even the gaps
+     between them are a build colour rather than flat black. */
+  background:
+    radial-gradient(120% 90% at 8% 0%, var(--bp-3-deep) 0%, transparent 62%),
+    radial-gradient(110% 80% at 96% 8%, var(--bp-1-deep) 0%, transparent 58%),
+    radial-gradient(130% 100% at 60% 108%, var(--bp-4-deep) 0%, transparent 66%),
+    var(--bg);
+}
+.hero-mesh i{
+  position:absolute; display:block; border-radius:50%;
+  filter:blur(78px); will-change:transform; mix-blend-mode:screen;
+}
+/* Stud Trading Hub */
+.hero-mesh i:nth-child(1){ width:46vw; height:46vw; left:-12vw; top:-14vw;   background:var(--bp-1); opacity:.30; animation:meshA 30s ease-in-out infinite; }
+/* Stud Tycoon Islands */
+.hero-mesh i:nth-child(2){ width:38vw; height:38vw; right:-6vw; top:2vw;     background:var(--bp-2); opacity:.26; animation:meshB 37s ease-in-out infinite; }
+/* Enchanted Grove */
+.hero-mesh i:nth-child(3){ width:44vw; height:44vw; left:26vw; bottom:-20vw; background:var(--bp-3); opacity:.30; animation:meshC 33s ease-in-out infinite; }
+/* Wizard Tower */
+.hero-mesh i:nth-child(4){ width:34vw; height:34vw; right:8vw;  bottom:-10vw;background:var(--bp-4); opacity:.26; animation:meshD 41s ease-in-out infinite; }
+/* Astral Lounge */
+.hero-mesh i:nth-child(5){ width:28vw; height:28vw; left:8vw;   top:34vh;    background:var(--bp-5); opacity:.20; animation:meshE 45s ease-in-out infinite; }
+/* Astral Promenade */
+.hero-mesh i:nth-child(6){ width:26vw; height:26vw; right:26vw; top:-8vw;    background:var(--bp-6); opacity:.18; animation:meshB 49s ease-in-out infinite reverse; }
+
+@keyframes meshA{ 0%,100%{ transform:translate3d(0,0,0) scale(1) }    50%{ transform:translate3d(8vw,6vh,0) scale(1.18) } }
+@keyframes meshB{ 0%,100%{ transform:translate3d(0,0,0) scale(1.08) } 50%{ transform:translate3d(-10vw,8vh,0) scale(.9) } }
+@keyframes meshC{ 0%,100%{ transform:translate3d(0,0,0) scale(1) }    50%{ transform:translate3d(6vw,-9vh,0) scale(1.22) } }
+@keyframes meshD{ 0%,100%{ transform:translate3d(0,0,0) scale(1.1) }  50%{ transform:translate3d(-7vw,-6vh,0) scale(.94) } }
+@keyframes meshE{ 0%,100%{ transform:translate3d(0,0,0) scale(.96) }  50%{ transform:translate3d(9vw,5vh,0) scale(1.24) } }
+
+@media (prefers-reduced-motion: reduce){ .hero-mesh i{ animation:none } }
+/* Blur at this radius is the one genuinely expensive thing here, and a
+   phone gains least from it. Smaller blobs, softer blur, same colours. */
+@media (max-width:900px){
+  .hero-mesh i{ filter:blur(54px); }
+  .hero-mesh i:nth-child(5), .hero-mesh i:nth-child(6){ display:none; }
+}
+
+/* The photograph now sits ON the gradient rather than over a flat black
+   scrim, so the headline reads against build colour. The mask fades the
+   image out toward the type instead of a rectangle of darkness. */
+.hero-media{ z-index:0; }
+.hero-media img{
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, rgba(0,0,0,.35) 26%, #000 62%),
+    linear-gradient(to bottom, #000 62%, transparent 100%);
+  mask-image:
+    linear-gradient(to right, transparent 0%, rgba(0,0,0,.35) 26%, #000 62%),
+    linear-gradient(to bottom, #000 62%, transparent 100%);
+  -webkit-mask-composite:source-in;
+  mask-composite:intersect;
+}
+.hero-media::after{
+  background:
+    linear-gradient(to bottom, rgba(10,10,13,.72) 0%, rgba(10,10,13,.10) 16%, transparent 28%),
+    linear-gradient(to top, var(--bg) 0%, rgba(10,10,13,.30) 38%, transparent 100%);
+}
+/* With the mesh underneath, the extra scrim the WebGL layer needed is gone. */
+.has-webgl .hero-media::after{
+  background:
+    linear-gradient(to bottom, rgba(10,10,13,.74) 0%, rgba(10,10,13,.12) 16%, transparent 28%),
+    linear-gradient(to top, var(--bg) 0%, rgba(10,10,13,.34) 38%, transparent 100%);
+}
+
+/* A hairline of build colour along the very top of the page, so the palette
+   is stated before you have scrolled at all. */
+.hero-mesh::after{
+  content:''; position:absolute; left:0; right:0; top:0; height:1px;
+  background:linear-gradient(90deg,
+    var(--bp-1), var(--bp-2), var(--bp-3), var(--bp-4), var(--bp-5), var(--bp-6));
+  opacity:.55;
+}
+
+/* Each thumbnail under the hero carries its own build's colour, which is
+   also one of the colours in the gradient behind it. It turns the mesh from
+   decoration into a key: the strip says which build each colour came from. */
+.hs{ position:relative; }
+.hs::before{
+  content:''; position:absolute; left:0; right:0; top:0; height:2px;
+  background:var(--hs-c, var(--accent));
+  opacity:.45; transition:opacity .3s var(--ease), box-shadow .3s var(--ease);
+}
+.hs:hover::before, .hs:focus-visible::before{
+  opacity:1; box-shadow:0 0 18px 1px var(--hs-c, var(--accent));
+}
+.hs .hs-thumb{ transition:box-shadow .35s var(--ease); }
+.hs:hover .hs-thumb{ box-shadow:0 10px 34px -8px var(--hs-c, transparent); }
+.hs:hover .hs-meta em{ color:var(--hs-c, var(--accent)); }
+
+/* On a narrow screen the hero stacks, so there is no left column for the
+   photograph to clear. The horizontal mask that makes the desktop layout
+   work erases almost the whole image here, so drop it and fade vertically
+   instead: image at the top, gradient carrying the type below it. */
+@media (max-width:900px){
+  .hero-media img{
+    -webkit-mask-image:linear-gradient(to bottom, #000 0%, #000 42%, transparent 88%);
+    mask-image:linear-gradient(to bottom, #000 0%, #000 42%, transparent 88%);
+    -webkit-mask-composite:source-over;
+    mask-composite:add;
+    object-position:50% 28%;
+  }
+  .hero-media::after{
+    background:
+      linear-gradient(to bottom, rgba(10,10,13,.62) 0%, rgba(10,10,13,.18) 22%, rgba(10,10,13,.55) 58%, var(--bg) 92%);
+  }
+  /* No photograph competing for the lower half, so let the builds show. */
+  .hero-mesh i{ opacity:.42; }
+  .hero-mesh i:nth-child(3){ opacity:.46; }
+}
