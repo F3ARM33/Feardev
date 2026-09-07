@@ -6,3 +6,8 @@ Runtime dep: html2canvas 1.4.1 must be loaded first.
 Local patch: ignoreElements also skips <canvas>. html2canvas throws
 InvalidStateError on any zero-sized canvas, which aborts the whole snapshot.
 See the LOCAL PATCH comment in container.js.
+
+Local patch: the scroll redraw is coalesced to one per animation frame and
+skipped while the element is off screen. Upstream redrew once per scroll
+event, reading getBoundingClientRect() each time, which with a smooth
+scroll library is a forced layout and a WebGL draw every frame.

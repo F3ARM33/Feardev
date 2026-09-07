@@ -15,6 +15,8 @@
   var DISCORD = 'https://discord.com/users/1088022144308486176'
 
   function capable() {
+    // ?fx=noglass / ?fx=off, see fx.js
+    if (window.__f34rFx && window.__f34rFx.glass) return false
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
     if (window.matchMedia('(max-width: 860px)').matches) return false
     if ((navigator.deviceMemory || 8) < 4) return false

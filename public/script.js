@@ -2109,14 +2109,81 @@ function setupMotion() {
     );
   });
 
-  // Images finish loading after ScrollTrigger measures, which shifts every
-  // start and end. Recalculate once everything has settled.
-  window.addEventListener("load", () => ScrollTrigger.refresh());
+  watchLayout();
+}
+
+/* Keeps ScrollTrigger's measurements honest.
+ *
+ * A single refresh on load is not enough. Images below the fold are lazy, so
+ * they load as they are approached, and every one of them changes the height
+ * of the document beneath every trigger below it. Left alone the drift
+ * accumulates into thousands of pixels, and triggers near the bottom of the
+ * page pass their own end before you ever reach them.
+ *
+ * So: refresh when the fonts land, when the page finishes loading, and after
+ * that whenever the document's height actually changes. The refresh is
+ * debounced, and skipped entirely when the height has not moved, so scrolling
+ * a settled page costs nothing. */
+/* The landing gradient keeps animating even when the hero is far above the
+   viewport, which means six blurred layers are being recomposited the whole
+   way down the page for something nobody can see. Stop them once the hero
+   has gone. */
+function setupMeshPause() {
+  const hero = document.querySelector(".hero");
+  if (!hero || !("IntersectionObserver" in window)) return;
+  new IntersectionObserver(
+    ([e]) => document.documentElement.classList.toggle("mesh-off", !e.isIntersecting),
+    { rootMargin: "200px" }
+  ).observe(hero);
+}
+
+function watchLayout() {
+  if (!window.ScrollTrigger) return;
+
+  let lastHeight = document.documentElement.scrollHeight;
+  let queued = 0;
+
+  const refresh = () => {
+    queued = 0;
+    lastHeight = document.documentElement.scrollHeight;
+    ScrollTrigger.refresh();
+  };
+
+  const schedule = () => {
+    if (queued) clearTimeout(queued);
+    queued = setTimeout(refresh, 180);
+  };
+
+  const ifChanged = () => {
+    if (document.documentElement.scrollHeight !== lastHeight) schedule();
+  };
+
+  window.addEventListener("load", schedule);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+
+  // Every lazy image that arrives, anywhere on the page.
+  document.addEventListener("load", (e) => {
+    if (e.target && e.target.tagName === "IMG") ifChanged();
+  }, true);
+
+  // Anything else that changes the page: the React islands mounting, the
+  // Discord card filling in, a section growing when its content arrives.
+  if ("ResizeObserver" in window) {
+    let first = true;
+    new ResizeObserver(() => {
+      if (first) { first = false; return; }
+      ifChanged();
+    }).observe(document.documentElement);
+  }
+
+  // The islands say when they are up, since they mount well after load.
+  window.addEventListener("f34r:mounted", schedule);
 }
 
 /* ============================== INIT ============================== */
 
 document.addEventListener("DOMContentLoaded", () => {
+  setupMeshPause();
   setupSmoothScroll();
   setupBoot();
 

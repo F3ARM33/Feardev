@@ -21,4 +21,7 @@ export default function boot() {
   mount('shaderMount', HeroGradient)
   mount('fieldMount', ContactField)
   document.documentElement.classList.add('has-webgl')
+  // The islands mount long after load and change what is on the page, so
+  // ScrollTrigger needs to re-measure once they are up.
+  window.dispatchEvent(new Event('f34r:mounted'))
 }

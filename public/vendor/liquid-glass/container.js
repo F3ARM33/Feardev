@@ -662,7 +662,30 @@ class Container {
 
     render()
 
-    const handleScroll = () => render()
+    // LOCAL PATCH: coalesce the scroll redraw to one per animation frame,
+    // and do nothing at all while the element is not on screen. Upstream
+    // rendered once per scroll event, and each render reads
+    // getBoundingClientRect(), so with a smooth scroll library firing an
+    // event every frame this was a forced layout plus a WebGL draw per
+    // frame for the whole page. See SOURCE.md.
+    let frameQueued = false
+    let onScreen = true
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(
+        ([e]) => { onScreen = e.isIntersecting },
+        { rootMargin: '80px' }
+      ).observe(this.element)
+    }
+
+    const handleScroll = () => {
+      if (frameQueued || !onScreen) return
+      frameQueued = true
+      requestAnimationFrame(() => {
+        frameQueued = false
+        if (onScreen) render()
+      })
+    }
     window.addEventListener('scroll', handleScroll, { passive: true })
 
     // Store render function for external calls

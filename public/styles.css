@@ -1513,9 +1513,25 @@ body.inverted .edge li.on b{ color:#0a0d02; }
 @media (prefers-reduced-motion: reduce){ .hero-mesh i{ animation:none } }
 /* Blur at this radius is the one genuinely expensive thing here, and a
    phone gains least from it. Smaller blobs, softer blur, same colours. */
+/* On mobile the blobs go away entirely and the same six colours are
+   painted straight into the background instead: no blur, no blend mode, no
+   promoted layers, no animation. Six large blurred elements with
+   will-change and mix-blend-mode keep six full screen GPU layers alive for
+   the whole session, and on a phone that is what makes scrolling the shelf
+   further down the page stutter. Painted, not composited. */
 @media (max-width:900px){
-  .hero-mesh i{ filter:blur(54px); }
-  .hero-mesh i:nth-child(5), .hero-mesh i:nth-child(6){ display:none; }
+  .hero-mesh i{ display:none; }
+  .hero-mesh{
+    background:
+      radial-gradient(70% 42% at 12% 4%,  color-mix(in srgb, var(--bp-1) 42%, transparent) 0%, transparent 70%),
+      radial-gradient(64% 38% at 92% 14%, color-mix(in srgb, var(--bp-3) 40%, transparent) 0%, transparent 68%),
+      radial-gradient(78% 44% at 42% 78%, color-mix(in srgb, var(--bp-4) 34%, transparent) 0%, transparent 72%),
+      radial-gradient(60% 40% at 84% 96%, color-mix(in srgb, var(--bp-5) 26%, transparent) 0%, transparent 70%),
+      radial-gradient(120% 90% at 8% 0%,   var(--bp-3-deep) 0%, transparent 62%),
+      radial-gradient(110% 80% at 96% 8%,  var(--bp-1-deep) 0%, transparent 58%),
+      radial-gradient(130% 100% at 60% 108%, var(--bp-4-deep) 0%, transparent 66%),
+      var(--bg);
+  }
 }
 
 /* The photograph now sits ON the gradient rather than over a flat black
@@ -1589,3 +1605,11 @@ body.inverted .edge li.on b{ color:#0a0d02; }
   .hero-mesh i{ opacity:.42; }
   .hero-mesh i:nth-child(3){ opacity:.46; }
 }
+
+/* Nothing to see once the hero has scrolled away. */
+.mesh-off .hero-mesh i{ animation-play-state:paused; will-change:auto; }
+
+/* ?fx=nomesh — see public/fx.js. Falls back to the flat page background. */
+.fx-no-mesh .hero-mesh{ background:var(--bg); }
+.fx-no-mesh .hero-mesh i, .fx-no-mesh .hero-mesh::after{ display:none; }
+.fx-no-mesh .hero-media img{ -webkit-mask-image:none; mask-image:none; }

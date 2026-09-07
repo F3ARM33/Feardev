@@ -11,6 +11,8 @@ export function canRunWebGL() {
   if (cached !== null) return cached
   cached = (() => {
     if (typeof window === 'undefined') return false
+    // ?fx=nowebgl / ?fx=off, see public/fx.js
+    if (window.__f34rFx && window.__f34rFx.webgl) return false
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
     // Low memory or few cores is the profile that actually struggles.
     if ((navigator.deviceMemory || 8) < 4) return false
