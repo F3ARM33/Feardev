@@ -635,18 +635,31 @@ function setupCraft() {
     show(best);
   };
 
-  if (window.ScrollTrigger) {
-    ScrollTrigger.create({
-      trigger: "#craft",
-      start: "top bottom",
-      end: "bottom top",
-      onUpdate: pick,
-      onRefresh: pick,
+  // Driven straight from the scroll position, not from ScrollTrigger.
+  //
+  // pick() measures the steps live on every call, so it needs no cached
+  // geometry, which is exactly what went wrong before: craft's trigger was
+  // created before the reel's pin existed, measured itself against a page
+  // 2196px shorter than the real one, and ended before the section it was
+  // watching had even started. Reading the scroll position directly cannot
+  // drift, because there is nothing held between reads.
+  let queued = false;
+  const onScroll = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      pick();
     });
-  } else if ("IntersectionObserver" in window) {
-    const io = new IntersectionObserver(pick, { rootMargin: "-45% 0px -45% 0px", threshold: [0, 0.5, 1] });
-    steps.forEach((st) => io.observe(st));
-  }
+  };
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll, { passive: true });
+
+  // Lenis drives its own scroll and does not always emit a window scroll
+  // event, so listen to it too when it is there.
+  if (typeof lenis !== "undefined" && lenis && lenis.on) lenis.on("scroll", onScroll);
+
   pick();
 }
 
