@@ -278,7 +278,11 @@ const tagsHTML = (tags) => `<div class="tags">${tags.map((t) => `<span class="ta
    left a whole section stuck at opacity 0. */
 
 function setupReveal() {
-  const items = document.querySelectorAll(".rv, .rv-g, .rule, .ln, .hero-strip");
+  // [data-hold] is the hero. It is on screen at load, so the observer would
+  // reveal it immediately and the entrance would play out behind the boot
+  // curtain. releaseHero() lets it go once the curtain has lifted.
+  const items = [...document.querySelectorAll(".rv, .rv-g, .rule, .ln, .hero-strip")]
+    .filter((n) => !n.hasAttribute("data-hold"));
   if (!("IntersectionObserver" in window)) {
     items.forEach((n) => n.classList.add("in"));
     return;
@@ -1487,9 +1491,71 @@ function scramble(node, text, duration = 900) {
    The drawing draws itself, the line resolves, the panel lifts. Once per
    session, and it never depends on GSAP loading. */
 
+/* The hero does not leave, it is left behind: the words go first and
+   fastest, the numbers follow, and the photograph drifts on long after both,
+   so the build is still on screen as the reader arrives in the work.
+
+   One timeline rather than six triggers, and one owner per property. CSS owns
+   every entrance in the hero, so this touches only what CSS does not: the
+   line boxes rather than the spans inside them, the copy block rather than
+   its paragraphs, the rail rather than its figures, the strip rather than its
+   thumbnails.
+
+   scrub is a number, not true. true pins the animation rigidly to the wheel,
+   so every jitter in the scroll shows up in the motion. 0.8 gives it eight
+   tenths of a second of catch up, which is the difference between motion that
+   feels weighted and motion that feels mechanical. */
+let heroExitBuilt = false;
+
+function buildHeroExit() {
+  if (heroExitBuilt) return;
+  if (typeof window.gsap === "undefined" || typeof window.ScrollTrigger === "undefined") return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (!document.querySelector(".hero")) return;
+  heroExitBuilt = true;
+
+  const lines = gsap.utils.toArray(".hero h1 .ln");
+
+  gsap
+    .timeline({
+      defaults: { ease: "power2.in" },
+      scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.8 },
+    })
+    // the headline goes first, a line at a time, rising out of its own box
+    .to(lines, { yPercent: -115, opacity: 0, duration: 0.42, stagger: 0.05 }, 0)
+    // then the block that carries the rule, the paragraph and the buttons
+    .to("#heroCopy", { y: -54, opacity: 0, duration: 0.5 }, 0.1)
+    // the numbers hold a moment longer
+    .to(".hero-rail", { y: -34, opacity: 0, duration: 0.52 }, 0.2)
+    // and the thumbnails settle downward rather than up, so the two edges of
+    // the screen do not leave in the same direction
+    .to(".hero-strip", { y: 30, opacity: 0, duration: 0.52 }, 0.26)
+    // the photograph is the slow layer under all of it: eased out, not in, so
+    // it moves most while the copy is still there and then settles
+    .fromTo(
+      ".hero-media img",
+      { yPercent: 0, scale: 1.08 },
+      { yPercent: 9, scale: 1.17, ease: "power1.out", duration: 1 },
+      0
+    );
+}
+
+/* Lets the hero animate in. Called when the curtain lifts, or straight away
+   when there is no curtain to wait for. */
+function releaseHero() {
+  document.querySelectorAll("[data-hold]").forEach((n) => {
+    n.removeAttribute("data-hold");
+    n.classList.add("in");
+  });
+  // Now that the hero is visible, its start values are the real ones.
+  requestAnimationFrame(buildHeroExit);
+  // rAF does not fire in a background tab, and the exit must exist either way.
+  setTimeout(buildHeroExit, 500);
+}
+
 function setupBoot() {
   const boot = document.getElementById("boot");
-  if (!boot) return;
+  if (!boot) { releaseHero(); return; }
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let seen = false;
@@ -1498,6 +1564,7 @@ function setupBoot() {
   const drop = () => {
     boot.remove();
     lockScroll(false);
+    releaseHero();
   };
   if (reduce || seen) { drop(); return; }
   try { sessionStorage.setItem("booted", "1"); } catch (e) { /* ignore */ }
@@ -1557,6 +1624,7 @@ function setupBoot() {
     // Lifting the curtain is a transform too, so the exit is composited.
     boot.classList.add("boot-out");
     lockScroll(false);
+    releaseHero();
     setTimeout(drop, 780);
   }, DUR);
 }
@@ -1950,25 +2018,11 @@ function setupMotion() {
 
   gsap.registerPlugin(ScrollTrigger);
 
-  /* -- Hero. The copy leaves before the image does, so the build stays on
-        screen as the reader moves down into the work. -- */
-  gsap.to(".hero-media img", {
-    scale: 1,
-    duration: 2.4,
-    ease: "power2.out",
-  });
-  gsap.to(".hero-media img", {
-    yPercent: 12,
-    scale: 1.14,
-    ease: "none",
-    scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
-  });
-  gsap.to(".hero-in", {
-    yPercent: -16,
-    opacity: 0,
-    ease: "none",
-    scrollTrigger: { trigger: ".hero", start: "top top", end: "72% top", scrub: true },
-  });
+  // The hero exit is deliberately not built here. A scrubbed tween reads its
+  // start values the moment it is created, and until the curtain lifts the
+  // hero is held at opacity 0, so building it at DOMContentLoaded would
+  // record "invisible" as the starting state and pin it there for good.
+  // releaseHero() builds it once the hero is on screen.
 
   /* -- THE REEL.
         Arriving, a build opens: the slab is clipped to a narrow vertical slot

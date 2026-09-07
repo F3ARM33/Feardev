@@ -37,3 +37,22 @@
   if (off.mesh) de.classList.add('fx-no-mesh')
   console.log('[f34r] effects disabled:', off)
 })()
+
+/* Failsafe for the hero.
+ *
+ * The hero is marked data-hold and sits at opacity 0 until the boot curtain
+ * lifts and script.js releases it. If script.js never arrives, nothing would
+ * ever release it and the landing page would stay blank. This runs
+ * unconditionally, well after the curtain would normally have gone, and is a
+ * no-op when the hold has already been lifted.
+ */
+(function () {
+  'use strict'
+  setTimeout(function () {
+    var held = document.querySelectorAll('[data-hold]')
+    for (var i = 0; i < held.length; i++) {
+      held[i].removeAttribute('data-hold')
+      held[i].classList.add('in')
+    }
+  }, 4000)
+})()

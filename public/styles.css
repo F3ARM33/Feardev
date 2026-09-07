@@ -1708,3 +1708,61 @@ body.inverted .edge li.on b{ color:#0a0d02; }
   @keyframes sprogFill{ from{ transform:scaleX(0) } to{ transform:scaleX(1) } }
 }
 @media (prefers-reduced-motion: reduce){ .sprog{ display:none } }
+
+/* ==========================================================================
+   HERO ENTRANCE
+   #heroCopy was one .rv, so the whole block arrived on a single curve:
+   headline, rule, paragraph and buttons all at the same instant. That is what
+   made the landing feel stiff. The block no longer moves as a block; each
+   part has its own delay, so the hero assembles.
+
+   Everything here is opacity and transform, and none of it is touched by
+   GSAP, which owns only the scrubbed exit and only on .ln, .hero-rail,
+   .hero-strip and the image. One owner per property, as everywhere else.
+   ========================================================================== */
+
+#heroCopy.rv{ opacity:1; transform:none; transition:none; }
+
+/* The headline rises a line at a time, slower and further apart than the
+   site default, because this is the one piece of type the visitor is
+   guaranteed to watch arrive. */
+#heroCopy h1 .ln > span{ transition-duration:1.15s; }
+#heroCopy.in h1 .ln:nth-child(1) > span{ transition-delay:.05s }
+#heroCopy.in h1 .ln:nth-child(2) > span{ transition-delay:.17s }
+#heroCopy.in h1 .ln:nth-child(3) > span{ transition-delay:.29s }
+
+#heroCopy .hero-dim,
+#heroCopy .hero-sub,
+#heroCopy .hero-ctas{
+  opacity:0; transform:translateY(18px);
+  transition:opacity .9s var(--ease), transform .9s var(--ease);
+}
+#heroCopy.in .hero-dim{ opacity:1; transform:none; transition-delay:.44s }
+#heroCopy.in .hero-sub{ opacity:1; transform:none; transition-delay:.54s }
+#heroCopy.in .hero-ctas{ opacity:1; transform:none; transition-delay:.66s }
+
+/* The numbers and the thumbnails come last, after the sentence has landed. */
+#heroRail.rv-g > *{ transition-duration:.95s; }
+#heroRail.rv-g.in > *:nth-child(1){ transition-delay:.72s }
+#heroRail.rv-g.in > *:nth-child(2){ transition-delay:.80s }
+#heroRail.rv-g.in > *:nth-child(3){ transition-delay:.88s }
+
+#heroStrip .hs{ transition-duration:.9s; }
+#heroStrip.in .hs:nth-child(1){ transition-delay:.86s }
+#heroStrip.in .hs:nth-child(2){ transition-delay:.93s }
+#heroStrip.in .hs:nth-child(3){ transition-delay:1.00s }
+#heroStrip.in .hs:nth-child(4){ transition-delay:1.07s }
+#heroStrip.in .hs:nth-child(5){ transition-delay:1.14s }
+#heroStrip.in .hs:nth-child(6){ transition-delay:1.21s }
+
+/* Held until the curtain lifts. Without this the entrance would play out
+   behind the curtain and be over before anyone saw it. */
+[data-hold]{ opacity:0 !important; }
+[data-hold] *{ transition-delay:0s !important; }
+
+@media (prefers-reduced-motion: reduce){
+  #heroCopy .hero-dim, #heroCopy .hero-sub, #heroCopy .hero-ctas{
+    opacity:1 !important; transform:none !important; transition:none !important;
+  }
+  [data-hold]{ opacity:1 !important; }
+}
