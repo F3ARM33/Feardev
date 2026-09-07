@@ -1,0 +1,9 @@
+# f34r.dev
+User-agent: *
+Allow: /
+
+# The share card generator is a build tool, not a page.
+Disallow: /_og.html
+Disallow: /api/
+
+Sitemap: https://f34r.dev/sitemap.xml

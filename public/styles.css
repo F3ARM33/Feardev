@@ -45,7 +45,7 @@
   --line-soft: rgba(255,255,255,0.045);
   --text:      #f5f5f7;
   --text-dim:  #a3a3ad;
-  --text-faint:#6e6e7a;
+  --text-faint:#868695;
 
   /* The spectrum from the Vision section, promoted to the whole page.
      Lime stays the interface colour because it is the most legible of the
@@ -1263,3 +1263,205 @@ body.inverted .edge li.on b{ color:#0a0d02; }
   .detail-meta{ grid-template-columns:repeat(2,1fr); }
   .detail-plate{ height:min(52vh,420px); }
 }
+
+/* ==========================================================================
+   WEBGL LAYERS
+   Two React islands render into these. Both holes are empty until the
+   bundle decides the device can afford them, so every rule here has to
+   look correct with no child at all.
+   ========================================================================== */
+
+.sg-mount, .r3f-mount{ position:absolute; inset:0; pointer-events:none; }
+
+/* Hero: sits over the photo but under the type. Screen blend keeps it as
+   light on the image rather than a sheet of colour over it. */
+.sg-mount{ z-index:0; opacity:0; transition:opacity 1.2s var(--ease); }
+.sg-host{ position:absolute; inset:0; mix-blend-mode:screen; opacity:.55; }
+.has-webgl .sg-mount{ opacity:1; }
+/* The photo's own scrims are what protect the headline. Deepen the left
+   one while the gradient is live so contrast never drops below AA. */
+.has-webgl .hero-media::after{
+  background:
+    linear-gradient(to bottom, rgba(10,10,13,.80) 0%, rgba(10,10,13,.14) 15%, rgba(10,10,13,0) 26%),
+    linear-gradient(to top, var(--bg) 1%, rgba(10,10,13,.40) 42%, rgba(10,10,13,.08) 100%),
+    linear-gradient(to right, rgba(10,10,13,.88) 0%, rgba(10,10,13,.34) 48%, rgba(10,10,13,.08) 78%);
+}
+.hero-in{ z-index:2; }
+
+/* Contact: under the console, over the section background. */
+.r3f-mount{ z-index:0; }
+.r3f-host{ position:absolute; inset:0; }
+.has-webgl #start .aurora{ opacity:.20; }
+
+@media (prefers-reduced-motion: reduce){
+  .sg-mount, .r3f-mount{ display:none; }
+}
+
+/* ==========================================================================
+   FLOATING CALL TO ACTION
+   One persistent way to hire, from the moment the hero leaves the screen.
+   ========================================================================== */
+
+.dock{
+  position:fixed; right:clamp(16px,2.4vw,32px); bottom:clamp(16px,2.4vw,32px);
+  z-index:55; opacity:0; translate:0 14px; pointer-events:none;
+  transition:opacity .5s var(--ease), translate .5s var(--ease);
+}
+.dock.is-on{ opacity:1; translate:0 0; pointer-events:auto; }
+
+.dock-pill{
+  display:inline-flex; align-items:center; gap:10px;
+  padding:13px 22px 13px 18px; border-radius:var(--r-pill);
+  font-size:14px; font-weight:600; letter-spacing:-.01em; color:#07070b;
+  background:var(--accent); border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 10px 34px rgba(0,0,0,.5), 0 0 0 6px rgba(204,255,51,.09);
+  transition:translate .3s var(--ease), box-shadow .3s var(--ease);
+}
+.dock-pill:hover{ translate:0 -2px; box-shadow:0 14px 42px rgba(0,0,0,.55), 0 0 0 8px rgba(204,255,51,.14); }
+.dock-pill:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
+.dock-dot{
+  width:7px; height:7px; border-radius:50%; background:#07070b;
+  box-shadow:0 0 0 3px rgba(7,7,11,.2); animation:dockPulse 2.4s var(--ease) infinite;
+}
+@keyframes dockPulse{ 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
+
+/* When the WebGL pill takes over, the CSS one becomes the hit target and
+   the label underneath it, so the link semantics survive. */
+.dock[data-glass="on"] .dock-pill{ position:absolute; inset:0; opacity:0; }
+.dock[data-glass="on"] .glass-button{ position:relative; }
+
+@media (prefers-reduced-motion: reduce){
+  .dock{ transition:none } .dock-dot{ animation:none }
+}
+
+/* ==========================================================================
+   FOOTER + CONSENT
+   ========================================================================== */
+
+.foot-links{ display:flex; gap:22px; align-items:center; flex-wrap:wrap; }
+.foot-links a{ font-size:13.5px; color:var(--text-faint); }
+.foot-links a:hover{ color:var(--accent); }
+
+.consent{
+  position:fixed; left:clamp(16px,2.4vw,32px); bottom:clamp(16px,2.4vw,32px);
+  z-index:80; width:min(420px, calc(100vw - 32px));
+  padding:20px 22px; border-radius:18px;
+  background:rgba(14,14,19,.94); border:1px solid var(--line);
+  backdrop-filter:blur(18px) saturate(140%);
+  box-shadow:0 18px 60px rgba(0,0,0,.6);
+  opacity:0; translate:0 16px; pointer-events:none;
+  transition:opacity .45s var(--ease), translate .45s var(--ease);
+}
+.consent.is-on{ opacity:1; translate:0 0; pointer-events:auto; }
+.consent h2{ font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint); margin:0 0 10px; font-weight:500; }
+.consent p{ font-size:13.5px; line-height:1.55; color:var(--text-dim); margin:0 0 16px; }
+.consent p a{ color:var(--accent); text-decoration:underline; text-underline-offset:3px; }
+.consent-row{ display:flex; gap:10px; }
+.consent button{
+  flex:1; padding:11px 16px; border-radius:var(--r-pill); font-size:13px; font-weight:600;
+  cursor:pointer; border:1px solid var(--line); background:transparent; color:var(--text);
+  transition:background .2s var(--ease), border-color .2s var(--ease);
+}
+.consent button:hover{ background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.28); }
+.consent button[data-act="accept"]{ background:var(--accent); border-color:var(--accent); color:#07070b; }
+.consent button[data-act="accept"]:hover{ filter:brightness(1.08); }
+.consent button:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+
+@media (max-width:520px){
+  .consent{ left:12px; right:12px; width:auto; bottom:12px }
+  .dock{ right:12px; bottom:auto; top:calc(100% - 0px) }
+  .dock{ bottom:12px; top:auto }
+}
+
+/* ==========================================================================
+   CONTACT FORM
+   ========================================================================== */
+
+.cform{ margin-top:clamp(28px,3.4vw,44px); display:grid; gap:18px; }
+.cform-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+@media (max-width:620px){ .cform-grid{ grid-template-columns:1fr } }
+
+.field{ display:grid; gap:8px; }
+.field label{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--text-faint);
+}
+.field label .opt{ text-transform:none; letter-spacing:.02em; opacity:.7; }
+.field input, .field textarea{
+  width:100%; padding:13px 15px; border-radius:12px;
+  background:rgba(255,255,255,.035); border:1px solid var(--line);
+  color:var(--text); font:inherit; font-size:15px; line-height:1.5;
+  transition:border-color .2s var(--ease), background .2s var(--ease);
+}
+.field textarea{ resize:vertical; min-height:112px; }
+.field input::placeholder, .field textarea::placeholder{ color:var(--text-faint); }
+.field input:hover, .field textarea:hover{ border-color:rgba(255,255,255,.22); }
+.field input:focus, .field textarea:focus{
+  outline:none; border-color:var(--accent); background:rgba(255,255,255,.06);
+  box-shadow:0 0 0 3px rgba(204,255,51,.16);
+}
+.field input.is-bad, .field textarea.is-bad{ border-color:#ff6b6b; }
+.field input.is-bad:focus, .field textarea.is-bad:focus{ box-shadow:0 0 0 3px rgba(255,107,107,.2); }
+
+.field-err{ min-height:0; margin:0; font-size:12.5px; color:#ff9d9d; }
+.field-err:empty{ display:none; }
+
+/* The honeypot. Off screen rather than display:none, because some bots
+   skip anything that is not rendered. */
+.hp{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+
+.cform-foot{ display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+.cform-send{
+  padding:14px 30px; border-radius:var(--r-pill); border:1px solid var(--accent);
+  background:var(--accent); color:#07070b; font:inherit; font-size:14.5px; font-weight:600;
+  cursor:pointer; transition:filter .2s var(--ease), translate .25s var(--ease), opacity .2s var(--ease);
+}
+.cform-send:hover:not(:disabled){ filter:brightness(1.08); translate:0 -2px; }
+.cform-send:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
+.cform-send:disabled{ opacity:.6; cursor:default; }
+.cform-note{ margin:0; font-size:13px; color:var(--text-faint); }
+.cform-note a{ color:var(--text-dim); text-decoration:underline; text-underline-offset:3px; }
+.cform-note a:hover{ color:var(--accent); }
+
+.cform-status{ margin:0; font-size:13.5px; }
+.cform-status:empty{ display:none; }
+.cform-status.is-good{ color:var(--accent); }
+.cform-status.is-bad{ color:#ff9d9d; }
+
+/* ==========================================================================
+   STANDALONE PAGES (legal, 404)
+   ========================================================================== */
+
+.page{ max-width:var(--maxw); margin:0 auto; padding:140px var(--gut) 100px; }
+.page-doc{ max-width:74ch; }
+.page h1{ font-size:clamp(2.4rem,5.4vw,4rem); letter-spacing:-.045em; margin:0 0 14px; }
+.page .stamp{
+  font-family:var(--mono); font-size:11px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--text-faint); display:block; margin-bottom:44px;
+}
+.page h2{
+  font-size:1.32rem; letter-spacing:-.02em; margin:44px 0 14px;
+  padding-top:26px; border-top:1px solid var(--line);
+}
+.page p, .page li{ font-size:15.5px; line-height:1.72; color:var(--text-dim); }
+.page p{ margin:0 0 15px; }
+.page ul{ margin:0 0 15px; padding-left:20px; }
+.page li{ margin-bottom:9px; }
+.page strong{ color:var(--text); font-weight:600; }
+.page a{ color:var(--accent); text-decoration:underline; text-underline-offset:3px; }
+.page-back{
+  display:inline-flex; align-items:center; gap:9px; margin-bottom:38px;
+  font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--text-faint); text-decoration:none;
+}
+.page-back:hover{ color:var(--accent); }
+
+.nf{ min-height:100dvh; display:grid; place-items:center; text-align:center; padding:120px var(--gut); }
+.nf-code{
+  font-size:clamp(6rem,22vw,15rem); line-height:.86; letter-spacing:-.06em;
+  font-weight:800; color:transparent;
+  background:var(--spectrum); -webkit-background-clip:text; background-clip:text;
+}
+.nf h1{ font-size:clamp(1.7rem,3.6vw,2.6rem); letter-spacing:-.035em; margin:26px 0 12px; }
+.nf p{ font-size:16px; color:var(--text-dim); max-width:46ch; margin:0 auto 34px; }
+.nf-row{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }

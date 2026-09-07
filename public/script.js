@@ -182,30 +182,35 @@ const CRAFT = [
     title: "The brief gets pinned down first",
     body: "Game, style, size, and deadline agreed in writing before a single part is placed. You get a plan, a timeline, and a fixed quote.",
     img: "img/enchanted/3.webp",
+    alt: "A lit path winding through the Enchanted Grove, the build used to plan scope",
   },
   {
     step: "Style",
     title: "Any art style you need",
     body: "Anime, low poly, cartoony, gritty high poly realism. The style follows your game, not my habits.",
     img: "img/igris/1.webp",
+    alt: "The Igris room, built in a dark stylised art style",
   },
   {
     step: "Build",
     title: "Terrain and interiors, not just props",
     body: "Sculpted landscapes, multi room interiors, and full maps. Whole environments rather than a folder of models.",
     img: "img/castle/1.webp",
+    alt: "A medieval castle with sculpted terrain and a full interior",
   },
   {
     step: "Review",
     title: "Revisions happen during the build",
     body: "Work in progress reaches you at every stage, so changes get made while they are cheap. Revisions inside the agreed scope are part of the price. Once it is delivered and signed off, new work is a new quote.",
     img: "img/wizard-tower/4.webp",
+    alt: "An interior floor of the Wizard Tower, shown mid build",
   },
   {
     step: "Deliver",
     title: "Delivered on the date agreed",
     body: "Timelines are set before the first block is placed, and I hold to them. Optimisation is not a final pass either. Part counts, unions, and texture budgets get watched from the first block.",
     img: "img/astral-lounge/1.webp",
+    alt: "The finished Astral art deco lounge, delivered and dressed",
   },
 ];
 const REVIEWS = [
@@ -557,7 +562,7 @@ function renderCraft() {
   if (media) {
     media.innerHTML = CRAFT.map(
       (c, i) =>
-        `<img src="${c.img}" srcset="${srcset(c.img)}" sizes="(max-width:900px) 100vw, 620px" alt="" loading="${i === 0 ? "eager" : "lazy"}" width="1200" height="900" class="${i === 0 ? "on" : ""}" data-shot="${i}" />`
+        `<img src="${c.img}" srcset="${srcset(c.img)}" sizes="(max-width:900px) 100vw, 620px" alt="${esc(c.alt)}" loading="${i === 0 ? "eager" : "lazy"}" width="1200" height="900" class="${i === 0 ? "on" : ""}" data-shot="${i}" />`
     ).join("");
   }
 
@@ -987,7 +992,7 @@ function openProject(i) {
   detailNode.addEventListener("click", (e) => {
     if (e.target.closest("[data-close]")) return closeProject();
     const shot = e.target.closest("[data-shot]");
-    if (shot) return openLightbox(p.images, Number(shot.dataset.shot));
+    if (shot) return openLightbox(p.images, Number(shot.dataset.shot), p.name);
     const nxt = e.target.closest("[data-next]");
     if (nxt) {
       detailNode.scrollTop = 0;
@@ -1009,10 +1014,12 @@ function closeProject(silent) {
 
 let lbNode = null;
 let lbImages = [];
+let lbLabel = "";
 let lbIndex = 0;
 
-function openLightbox(images, index) {
+function openLightbox(images, index, label) {
   lbImages = images;
+  lbLabel = label || "";
   lbIndex = index;
   if (lbNode) lbNode.remove();
   lbNode = el(`
@@ -1037,7 +1044,11 @@ function openLightbox(images, index) {
 
 function paintLightbox() {
   const single = lbImages.length < 2;
-  lbNode.querySelector("img").src = lbImages[lbIndex];
+  const lbImg = lbNode.querySelector("img");
+  lbImg.src = lbImages[lbIndex];
+  lbImg.alt = lbLabel
+    ? `${lbLabel}, image ${lbIndex + 1} of ${lbImages.length}`
+    : `Image ${lbIndex + 1} of ${lbImages.length}`;
   lbNode.querySelector(".lb-count").textContent = `${lbIndex + 1} / ${lbImages.length}`;
   lbNode.querySelectorAll(".lb-nav").forEach((b) => (b.hidden = single));
 }
@@ -1130,6 +1141,36 @@ function formatElapsed(ms) {
 // Useful for checking whether Spotify / activities are actually arriving.
 const DISCORD_DEBUG = false;
 
+/* Relative luminance, per WCAG. */
+function relLum([r, g, b]) {
+  const f = (v) => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+}
+
+function contrast(a, b) {
+  const l1 = relLum(a), l2 = relLum(b);
+  return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+}
+
+/* Takes a colour and the background it sits on, and returns the closest
+   colour to it that still reaches the target contrast. The hue is kept and
+   only the lightness moves, so a personalised colour stays recognisable
+   while remaining readable. */
+function readableOn(rgb, bg, target = 4.5) {
+  if (contrast(rgb, bg) >= target) return rgb;
+  const toward = relLum(bg) > 0.5 ? 0 : 255;
+  let lo = 0, hi = 1, best = rgb.map(() => toward);
+  for (let i = 0; i < 20; i++) {
+    const mid = (lo + hi) / 2;
+    const test = rgb.map((v) => Math.round(v + (toward - v) * mid));
+    if (contrast(test, bg) >= target) { best = test; hi = mid; } else { lo = mid; }
+  }
+  return best;
+}
+
 function renderDiscordPresence(data) {
   if (DISCORD_DEBUG) {
     console.log("[Lanyard] listening_to_spotify:", data.listening_to_spotify);
@@ -1173,7 +1214,10 @@ function renderDiscordPresence(data) {
   const nameEl = document.querySelector(".discord-username");
   const nameColor = du?.display_name_styles?.colors?.[0];
   if (nameEl && typeof nameColor === "number") {
-    nameEl.style.color = `#${nameColor.toString(16).padStart(6, "0")}`;
+    const rgb = [(nameColor >> 16) & 255, (nameColor >> 8) & 255, nameColor & 255];
+    // The card this sits on, so the check is against what is really behind it.
+    const safe = readableOn(rgb, [22, 22, 28]);
+    nameEl.style.color = `rgb(${safe[0]}, ${safe[1]}, ${safe[2]})`;
   }
 
   // Server clan / guild tag (e.g. "RAR") shown next to the name
