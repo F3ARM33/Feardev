@@ -1509,7 +1509,11 @@ function setupBoot() {
   lockScroll(true);
 
   // Each stroke is dashed by its own length, so it draws rather than fades.
-  if (draw) {
+  // SVG stroke animation is not compositor accelerated, so eight of them
+  // during load is more than a phone can absorb. Desktop only.
+  const drawOK = window.matchMedia("(min-width: 821px)").matches;
+  if (draw && !drawOK) draw.style.opacity = "0";
+  if (draw && drawOK) {
     [...draw.children].forEach((el, i) => {
       // A guide line is already dashed. Overwriting its dash to draw it would
       // turn it solid, so those fade in and only the solid strokes draw.
@@ -1530,22 +1534,31 @@ function setupBoot() {
   if (line) setTimeout(() => scramble(line, text, 820), 420);
 
   // Safety net: a throttled renderer must not leave a visitor behind a curtain.
-  const bail = setTimeout(drop, 3400);
+  const bail = setTimeout(drop, 3000);
 
-  const DUR = 1500;
+  // The bar is a CSS animation on transform, so the compositor owns it and a
+  // busy main thread cannot make it stutter. See .boot-bar in styles.css.
+  const DUR = 1100;
+  boot.classList.add("boot-run");
+
+  // The counter is the only part that needs scripting. Seventeen writes over
+  // the whole run rather than one per frame.
   const t0 = performance.now();
-  const tick = (now) => {
-    const p = Math.min(1, (now - t0) / DUR);
+  const count = setInterval(() => {
+    const p = Math.min(1, (performance.now() - t0) / DUR);
     n.textContent = String(Math.round(100 * p)).padStart(3, "0");
-    bar.style.width = `${p * 100}%`;
-    if (p < 1) { requestAnimationFrame(tick); return; }
+    if (p >= 1) clearInterval(count);
+  }, 60);
+
+  setTimeout(() => {
+    clearInterval(count);
     clearTimeout(bail);
-    boot.style.transition = "transform .85s cubic-bezier(.76,0,.24,1)";
-    boot.style.transform = "translateY(-101%)";
+    n.textContent = "100";
+    // Lifting the curtain is a transform too, so the exit is composited.
+    boot.classList.add("boot-out");
     lockScroll(false);
-    setTimeout(drop, 900);
-  };
-  requestAnimationFrame(tick);
+    setTimeout(drop, 780);
+  }, DUR);
 }
 
 /* ============================== AMBIENT LIGHT ==============================
@@ -1965,6 +1978,13 @@ function setupMotion() {
         panels read as one continuous handoff rather than six pages sliding.
         All of it is transform, opacity and an inset clip, so it stays on the
         compositor. -- */
+  // Two of the reel's five tweens per panel repaint rather than composite:
+  // the clip path reveal, and the scale on the image. On a phone that is a
+  // full screen repaint per frame, per panel, which is what makes scrolling
+  // the reel stutter. They are desktop only. The rest are transform and
+  // opacity and run everywhere.
+  const heavyOK = window.matchMedia("(min-width: 821px)").matches;
+
   const panels = gsap.utils.toArray(".panel");
   panels.forEach((panel, i) => {
     const slab = panel.querySelector(".slab");
@@ -1973,20 +1993,22 @@ function setupMotion() {
     const num = panel.querySelector(".panel-n");
 
     // opening: the slot widens into the full frame
-    gsap.fromTo(
-      slab,
-      { clipPath: "inset(0% 44% 0% 44%)" },
-      {
-        clipPath: "inset(0% 0% 0% 0%)",
-        ease: "power2.out",
-        scrollTrigger: { trigger: panel, start: "top bottom", end: "top 12%", scrub: true },
-      }
-    );
-    gsap.fromTo(
-      img,
-      { scale: 1.32 },
-      { scale: 1, ease: "none", scrollTrigger: { trigger: panel, start: "top bottom", end: "top top", scrub: true } }
-    );
+    if (heavyOK) {
+      gsap.fromTo(
+        slab,
+        { clipPath: "inset(0% 44% 0% 44%)" },
+        {
+          clipPath: "inset(0% 0% 0% 0%)",
+          ease: "power2.out",
+          scrollTrigger: { trigger: panel, start: "top bottom", end: "top 12%", scrub: true },
+        }
+      );
+      gsap.fromTo(
+        img,
+        { scale: 1.32 },
+        { scale: 1, ease: "none", scrollTrigger: { trigger: panel, start: "top bottom", end: "top top", scrub: true } }
+      );
+    }
     // the caption arrives last, once the frame is open enough to hold it
     if (cap) {
       gsap.fromTo(
