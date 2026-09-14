@@ -867,7 +867,7 @@ function renderScope() {
 
 /* ============================== LOCAL CLOCK ==============================
    Where I am in the day, so a client can tell whether a reply is likely in the
-   next hour. Asia/Karachi is GMT+5 and does not observe daylight saving, so the
+   next hour. Asia/Dubai is GMT+4 and does not observe daylight saving, so the
    label is fixed; the time itself comes from the browser rather than from an
    offset I hard coded. */
 
@@ -879,13 +879,13 @@ function setupClock() {
   let fmt;
   try {
     fmt = new Intl.DateTimeFormat("en-GB", {
-      timeZone: "Asia/Karachi",
+      timeZone: "Asia/Dubai",
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
     });
   } catch (e) {
-    // No IANA database available: fall back to a fixed +5 offset.
+    // No IANA database available: fall back to a fixed +4 offset.
     fmt = null;
   }
 
@@ -894,7 +894,7 @@ function setupClock() {
     if (fmt) {
       [hh, mm] = fmt.format(new Date()).split(":");
     } else {
-      const d = new Date(Date.now() + (5 * 60 + new Date().getTimezoneOffset()) * 60000);
+      const d = new Date(Date.now() + (4 * 60 + new Date().getTimezoneOffset()) * 60000);
       hh = String(d.getHours()).padStart(2, "0");
       mm = String(d.getMinutes()).padStart(2, "0");
     }
@@ -905,7 +905,7 @@ function setupClock() {
   // Tick on the minute rather than every second: nothing here needs seconds,
   // and an interval that fires 60 times more often buys nothing.
   setInterval(paint, 20000);
-  if (zone) zone.textContent = "GMT +5";
+  if (zone) zone.textContent = "GMT +4";
 }
 
 /* ============================== DISCORD CARD MARKUP ==============================
